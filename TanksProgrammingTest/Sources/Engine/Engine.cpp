@@ -40,6 +40,8 @@ void Engine::Initialize()
 	m_ResourceManager = new ResourceManager("Resources");
 	m_ResourceManager->LoadResources();
 
+	TTF_Init();
+
 	if (m_ActiveScene != nullptr)
 	{
 		m_ActiveScene->Initialize();
@@ -117,6 +119,7 @@ void Engine::ShutDown()
 		m_ActiveScene->UnInitialize();
 	}
 
+	TTF_Quit();
 	SDL_DestroyRenderer(m_Renderer);
 	SDL_DestroyWindow(m_Window);
 	SDL_Quit();
