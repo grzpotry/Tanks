@@ -11,7 +11,7 @@ Engine::Engine()
 	, m_ResourceManager(nullptr)
 	, FramesPerSecond(60)
 	, TimePerFrameInMs(1000 / FramesPerSecond)
-	, TimePerFramInSceonds(TimePerFrameInMs / 1000.f)
+	, TimePerFrameInSeconds(TimePerFrameInMs / 1000.f)
 {
 }
 
@@ -46,41 +46,55 @@ void Engine::Initialize()
 	}
 }
 
+void Engine::Update(float DeltaTime)
+{
+	if (m_ActiveScene != nullptr)
+	{
+		m_ActiveScene->Update(DeltaTime);
+	}
+}
+
 void Engine::MainLoop()
 {
 	bool Close = false;
-	unsigned int CurrentTime = SDL_GetTicks();
-	unsigned int LastTime = CurrentTime;
+	float CurrentTime = SDL_GetTicks() / 1000.0f;
+	float FixedUpdateAccumulator = 0.0f;
+	int FrameCount = 0;
 
 	while (!Close)
 	{
-		CurrentTime = SDL_GetTicks();
-		while (!Close && CurrentTime > LastTime + TimePerFrameInMs)
+		float NewTime = SDL_GetTicks() / 1000.0f;
+		float NextFrameTime = NewTime - CurrentTime;
+
+		CurrentTime = NewTime;
+		FixedUpdateAccumulator+= NextFrameTime;
+		
+		SDL_Event Event;
+			
+		while (SDL_PollEvent(&Event))
 		{
+			if (Event.type == SDL_QUIT || Event.type == SDL_KEYDOWN && Event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+			{
+				Close = true;
+				break;
+			}
+			else
+			{
+				m_Events.emplace_back(Event);
+			}
+		}
+		
+		while (FixedUpdateAccumulator >= TimePerFrameInSeconds)
+		{
+			Update(FixedUpdateAccumulator);
 			m_Events.clear();
-			SDL_Event Event;
-			while (SDL_PollEvent(&Event))
-			{
-				if (Event.type == SDL_QUIT || Event.type == SDL_KEYDOWN && Event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				{
-					Close = true;
-					break;
-				}
-				else
-				{
-					m_Events.push_back(Event);
-				}
-			}
 
-			if (m_ActiveScene != nullptr)
-			{
-				m_ActiveScene->Update(TimePerFramInSceonds);
-			}
-
-			LastTime += TimePerFrameInMs;
+			FixedUpdateAccumulator -= TimePerFrameInSeconds;
+			FrameCount++;
 		}
 
 		Draw();
+		SDL_Delay(1);
 	}
 }
 

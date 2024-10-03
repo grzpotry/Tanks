@@ -3,16 +3,78 @@
 #include "EntityComponent.h"
 #include "Engine.h"
 
-class TextureCompoent : public EntityComponent
+
+struct SdlDeleter
 {
+	void operator()(SDL_Window* p) const { SDL_DestroyWindow(p); }
+	void operator()(SDL_Renderer* p) const { SDL_DestroyRenderer(p); }
+	void operator()(SDL_Texture* p) const
+	{
+		SDL_DestroyTexture(p);
+	}
+};
 
+
+class TextureComponent : public EntityComponent
+{
 public:
-	TextureCompoent(Entity* Owner);
-	TextureCompoent();
+	TextureComponent(Entity* Owner);
+	TextureComponent();
 
-	virtual EntityComponent* Clone() const override { return new TextureCompoent(*this); }
+	TextureComponent(const TextureComponent& other)
+		: EntityComponent(other),
+		  TexturePath(other.TexturePath),
+		  m_Rectangle(other.m_Rectangle)
+	{
+		if (TexturePath.length() > 0)
+		{
+			LoadTexture(TexturePath, m_TexturePtr);
+		}
+	}
+
+	TextureComponent(TextureComponent&& other) noexcept: EntityComponent(other.GetOwner())
+	{
+		TexturePath = std::move(other.TexturePath);
+		m_Rectangle = std::move(other.m_Rectangle);
+		m_TexturePtr = std::move(other.m_TexturePtr);
+
+		other.m_TexturePtr = nullptr;
+	}
+
+	TextureComponent& operator=(const TextureComponent& other)
+	{
+		if (this == &other)
+			return *this;
+		EntityComponent::operator =(other);
+		TexturePath = other.TexturePath;
+		m_Rectangle = other.m_Rectangle;
+		
+		if (TexturePath.length() > 0)
+		{
+			LoadTexture(TexturePath, m_TexturePtr);
+		}
+
+		return *this;
+	}
+
+	TextureComponent& operator=(TextureComponent&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+		
+		TexturePath = std::move(other.TexturePath);
+		m_Rectangle = std::move(other.m_Rectangle);
+		m_TexturePtr = std::move(other.m_TexturePtr);
+		
+		other.m_TexturePtr = nullptr;
+		return *this;
+	}
+
+
+	virtual EntityComponent* Clone() const override { return new TextureComponent(*this); }
 
 	virtual void LoadFromConfig(nlohmann::json Config) override;
+	static void LoadTexture(std::string Path, std::unique_ptr<SDL_Texture, SdlDeleter>& Result);
 	virtual void Initialize() override;
 	virtual void UnInitialize() override;
 	virtual void Draw() override;
@@ -22,7 +84,14 @@ public:
 	void SetScale(int w, int h);
 	SDL_Rect& GetRectangle() { return m_Rectangle; }
 
+protected:
+	~TextureComponent()
+	{
+		m_TexturePtr = nullptr;
+	}
+
 private:
 	std::string TexturePath;
 	SDL_Rect m_Rectangle;
+	std::unique_ptr<SDL_Texture, SdlDeleter> m_TexturePtr;
 };

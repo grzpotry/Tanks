@@ -16,6 +16,7 @@ public:
 	static Engine* Get();
 
 	void Initialize();
+	void Update(float DeltaTime);
 	void MainLoop();
 	void Draw();
 	void ShutDown();
@@ -37,7 +38,7 @@ private:
 	
 	unsigned int FramesPerSecond;
 	unsigned int TimePerFrameInMs;
-	float TimePerFramInSceonds;
+	float TimePerFrameInSeconds;
 
 	std::vector<SDL_Event> m_Events;
 };

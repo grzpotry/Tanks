@@ -32,10 +32,9 @@ void Scene::LoadFromConfig(nlohmann::json Config)
 		}
 	}
 
-	nlohmann::json::const_iterator SecenLayoutIt = Config.find("SceneLayout");
-	if (SecenLayoutIt != Config.end())
+	if (const nlohmann::json::const_iterator SceneLayoutIt = Config.find("SceneLayout"); SceneLayoutIt != Config.end())
 	{
-		LoadSceneFromLayout((*SecenLayoutIt)["Content"], (*SecenLayoutIt)["Legend"]);
+		LoadSceneFromLayout((*SceneLayoutIt)["Content"], (*SceneLayoutIt)["Legend"]);
 	}
 }
 
@@ -97,7 +96,7 @@ void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
 				nlohmann::json EntitySpecs = Legend[Key];
 
 				Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
-				TextureCompoent* TextureComponentPtr = NewEntity->GetComponent<TextureCompoent>();
+				TextureComponent* TextureComponentPtr = NewEntity->GetComponent<TextureComponent>();
 				int Width = EntitySpecs["Width"];
 				int Height = EntitySpecs["Height"];
 				TextureComponentPtr->SetPosition(Column * Width, Row * Height);

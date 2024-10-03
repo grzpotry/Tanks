@@ -16,49 +16,65 @@ PlayerInputComponent::PlayerInputComponent()
 
 void PlayerInputComponent::Initialize()
 {
-	m_TextureComponent = GetOwner()->GetComponent<TextureCompoent>();
+	m_TextureComponent = GetOwner()->GetComponent<TextureComponent>();
 }
 
 void PlayerInputComponent::Update(float DeltaTime)
 {
-	const int Speed = 300;
+	const int Speed = 3;
 	SDL_Rect& Rectangle = m_TextureComponent->GetRectangle();
 	std::vector<SDL_Event> Events = Engine::Get()->GetEvents();
-	
-	for (const SDL_Event& Event : Events)
-	{
-		switch (Event.type) 
-		{
-			case SDL_KEYDOWN :
-			{
-				switch (Event.key.keysym.scancode)
-				{
-					case SDL_SCANCODE_W :
-					case SDL_SCANCODE_UP :
-						Rectangle.y -= Speed / 30;
-						break;
-					case SDL_SCANCODE_A :
-					case SDL_SCANCODE_LEFT :
-						Rectangle.x -= Speed / 30;
-						break;
-					case SDL_SCANCODE_S :
-					case SDL_SCANCODE_DOWN :
-						Rectangle.y += Speed / 30;
-						break;
-					case SDL_SCANCODE_D :
-					case SDL_SCANCODE_RIGHT :
-						Rectangle.x += Speed / 30;
-						break;
-					default:
-						break;
-				}
-			}
-		}
+	const Uint8* Keystates = SDL_GetKeyboardState(NULL);
+
+	//TODO: add some input handling layer
+	if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A]) {
+		Rectangle.x -= Speed;
 	}
+	if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D]) {
+		Rectangle.x += Speed;
+	}
+	if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP]) {
+		Rectangle.y -= Speed;
+	}
+	if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN]) {
+		Rectangle.y += Speed;
+	}
+	
+	// for (const SDL_Event& Event : Events)
+	// {
+	// 	switch (Event.type) 
+	// 	{
+	// 		case SDL_KEYDOWN:
+	// 		{
+	// 			switch (Event.key.keysym.scancode)
+	// 			{
+	// 				case SDL_SCANCODE_W :
+	// 				case SDL_SCANCODE_UP :
+	// 					Rectangle.y -= Speed / 30;
+	// 					break;
+	// 				case SDL_SCANCODE_A :
+	// 				case SDL_SCANCODE_LEFT :
+	// 					Rectangle.x -= Speed / 30;
+	// 					break;
+	// 				case SDL_SCANCODE_S :
+	// 				case SDL_SCANCODE_DOWN :
+	// 					Rectangle.y += Speed / 30;
+	// 					break;
+	// 				case SDL_SCANCODE_D :
+	// 				case SDL_SCANCODE_RIGHT :
+	// 					Rectangle.x += Speed / 30;
+	// 					break;
+	// 				default:
+	// 					break;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	int MaxWidth = 0, MaxHeight = 0;
 	SDL_GetWindowSize(Engine::Get()->GetWindow(), &MaxWidth, &MaxHeight);
 
+	//restrict movement
 	if (Rectangle.x + Rectangle.w > MaxWidth)
 	{
 		Rectangle.x = MaxWidth - Rectangle.w;

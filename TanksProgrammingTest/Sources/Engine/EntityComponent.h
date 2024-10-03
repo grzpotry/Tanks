@@ -6,7 +6,6 @@ class Entity;
 
 class EntityComponent
 {
-
 public:
 	EntityComponent() = delete;
 	EntityComponent(Entity* Owner);
@@ -21,6 +20,9 @@ public:
 
 	void SetOwner(Entity* Owner) { m_Owner = Owner; }
 	Entity* GetOwner() { return m_Owner; }
+
+protected:
+	~EntityComponent() = default;
 
 private:
 	Entity* m_Owner;

@@ -63,5 +63,5 @@ void Entity::AddComponent(EntityComponent* Component)
 
 void Entity::RemoveComponent(EntityComponent* Component)
 {
-	auto RetIt = std::remove(m_Components.begin(), m_Components.end(), Component);
+	m_Components.remove(Component);
 }

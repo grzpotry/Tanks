@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 
 	ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
 	ResourceManagerPtr->RegisterComponent("PlayerInputComponent", new PlayerInputComponent());
-	ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureCompoent());
+	ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureComponent());
 
 	Engine::Get()->CreateActiveSceneFromTemplate("MainScene");
 
