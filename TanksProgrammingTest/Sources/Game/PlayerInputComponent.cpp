@@ -29,15 +29,19 @@ void PlayerInputComponent::Update(float DeltaTime)
 	//TODO: add some input handling layer
 	if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A]) {
 		Rectangle.x -= Speed;
+		m_TextureComponent->SetRotationAngle(-90);
 	}
 	if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D]) {
 		Rectangle.x += Speed;
+		m_TextureComponent->SetRotationAngle(90);
 	}
 	if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP]) {
 		Rectangle.y -= Speed;
+		m_TextureComponent->SetRotationAngle(0);
 	}
 	if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN]) {
 		Rectangle.y += Speed;
+		m_TextureComponent->SetRotationAngle(180);
 	}
 	
 	// for (const SDL_Event& Event : Events)

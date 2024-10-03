@@ -43,7 +43,7 @@ void TextureComponent::LoadTexture(std::string Path, std::unique_ptr<SDL_Texture
 
 void TextureComponent::Initialize()
 {
-	LoadTexture(TexturePath, m_TexturePtr);
+	LoadTexture(m_TexturePath, m_TexturePtr);
 }
 
 void TextureComponent::UnInitialize()
@@ -55,13 +55,15 @@ void TextureComponent::Draw()
 {
 	if (m_TexturePtr != nullptr)
 	{
-		SDL_RenderCopy(Engine::Get()->GetRenderer(), m_TexturePtr.get(), nullptr, &m_Rectangle);
+		m_Center.x = m_Rectangle.w / 2;
+		m_Center.y = m_Rectangle.h / 2;
+		SDL_RenderCopyEx(Engine::Get()->GetRenderer(), m_TexturePtr.get(), nullptr, &m_Rectangle, m_RotationAngle, &m_Center, SDL_FLIP_NONE);
 	}
 }
 
 void TextureComponent::SetTextureFromAssetName(std::string Name)
 {
-	TexturePath = "Resources/Images/" + Name;
+	m_TexturePath = "Resources/Images/" + Name;
 }
 
 void TextureComponent::SetPosition(int x, int y)
@@ -74,4 +76,9 @@ void TextureComponent::SetScale(int w, int h)
 {
 	m_Rectangle.w = w;
 	m_Rectangle.h = h;
+}
+
+void TextureComponent::SetRotationAngle(float angle)
+{
+	m_RotationAngle = angle;
 }

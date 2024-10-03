@@ -23,18 +23,18 @@ public:
 
 	TextureComponent(const TextureComponent& other)
 		: EntityComponent(other),
-		  TexturePath(other.TexturePath),
+		  m_TexturePath(other.m_TexturePath),
 		  m_Rectangle(other.m_Rectangle)
 	{
-		if (TexturePath.length() > 0)
+		if (m_TexturePath.length() > 0)
 		{
-			LoadTexture(TexturePath, m_TexturePtr);
+			LoadTexture(m_TexturePath, m_TexturePtr);
 		}
 	}
 
 	TextureComponent(TextureComponent&& other) noexcept: EntityComponent(other.GetOwner())
 	{
-		TexturePath = std::move(other.TexturePath);
+		m_TexturePath = std::move(other.m_TexturePath);
 		m_Rectangle = std::move(other.m_Rectangle);
 		m_TexturePtr = std::move(other.m_TexturePtr);
 
@@ -46,12 +46,12 @@ public:
 		if (this == &other)
 			return *this;
 		EntityComponent::operator =(other);
-		TexturePath = other.TexturePath;
+		m_TexturePath = other.m_TexturePath;
 		m_Rectangle = other.m_Rectangle;
 		
-		if (TexturePath.length() > 0)
+		if (m_TexturePath.length() > 0)
 		{
-			LoadTexture(TexturePath, m_TexturePtr);
+			LoadTexture(m_TexturePath, m_TexturePtr);
 		}
 
 		return *this;
@@ -62,7 +62,7 @@ public:
 		if (this == &other)
 			return *this;
 		
-		TexturePath = std::move(other.TexturePath);
+		m_TexturePath = std::move(other.m_TexturePath);
 		m_Rectangle = std::move(other.m_Rectangle);
 		m_TexturePtr = std::move(other.m_TexturePtr);
 		
@@ -82,6 +82,8 @@ public:
 	void SetTextureFromAssetName(std::string Name);
 	void SetPosition(int x, int y);
 	void SetScale(int w, int h);
+	void SetRotationAngle(float angle);
+	
 	SDL_Rect& GetRectangle() { return m_Rectangle; }
 
 protected:
@@ -91,7 +93,10 @@ protected:
 	}
 
 private:
-	std::string TexturePath;
+	
+	std::string m_TexturePath;
 	SDL_Rect m_Rectangle;
+	SDL_Point m_Center;
+	float m_RotationAngle = 0.0;
 	std::unique_ptr<SDL_Texture, SdlDeleter> m_TexturePtr;
 };

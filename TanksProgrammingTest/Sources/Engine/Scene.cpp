@@ -77,7 +77,7 @@ void Scene::AddEntity(Entity* Entity)
 
 void Scene::RemoveEntity(Entity* Entity)
 {
-	auto RetIt = std::remove(m_Entities.begin(), m_Entities.end(), Entity);
+	m_Entities.remove(Entity);
 }
 
 void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
