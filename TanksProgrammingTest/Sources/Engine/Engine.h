@@ -38,7 +38,6 @@ private:
 	ResourceManager* m_ResourceManager;
 	
 	unsigned int FramesPerSecond;
-	unsigned int TimePerFrameInMs;
 	float TimePerFrameInSeconds;
 
 	std::vector<SDL_Event> m_Events;

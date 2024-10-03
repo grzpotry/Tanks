@@ -10,8 +10,7 @@ Engine::Engine()
 	, m_ActiveScene(nullptr)
 	, m_ResourceManager(nullptr)
 	, FramesPerSecond(60)
-	, TimePerFrameInMs(1000 / FramesPerSecond)
-	, TimePerFrameInSeconds(TimePerFrameInMs / 1000.f)
+	, TimePerFrameInSeconds(1.0f / FramesPerSecond)
 {
 }
 
@@ -59,17 +58,18 @@ void Engine::Update(float DeltaTime)
 void Engine::MainLoop()
 {
 	bool Close = false;
-	float CurrentTime = SDL_GetTicks() / 1000.0f;
-	float FixedUpdateAccumulator = 0.0f;
+	unsigned int CurrentTime = SDL_GetTicks();
+	double FixedUpdateAccumulator = 0.0f;
 	int FrameCount = 0;
 
 	while (!Close)
 	{
-		float NewTime = SDL_GetTicks() / 1000.0f;
-		float NextFrameTime = NewTime - CurrentTime;
+		const unsigned int NewTime = SDL_GetTicks();
+		const unsigned int NextFrameTimeMs = NewTime - CurrentTime;
+		double DeltaTime = NextFrameTimeMs /1000.0f;
 
 		CurrentTime = NewTime;
-		FixedUpdateAccumulator+= NextFrameTime;
+		FixedUpdateAccumulator+= DeltaTime;
 		
 		SDL_Event Event;
 			
@@ -85,18 +85,36 @@ void Engine::MainLoop()
 				m_Events.emplace_back(Event);
 			}
 		}
-		
-		while (FixedUpdateAccumulator >= TimePerFrameInSeconds)
-		{
-			Update(FixedUpdateAccumulator);
-			m_Events.clear();
 
+		constexpr int MaxUpdatesPerFrame = 5;
+		int UpdateCount = 0;
+		
+		while (FixedUpdateAccumulator >= TimePerFrameInSeconds && UpdateCount < MaxUpdatesPerFrame)
+		{
+			Update(TimePerFrameInSeconds );
 			FixedUpdateAccumulator -= TimePerFrameInSeconds;
 			FrameCount++;
+			UpdateCount++;
+		}
+		
+		if (UpdateCount == MaxUpdatesPerFrame)
+		{
+			FixedUpdateAccumulator = 0.0f;
+		}
+		
+		Draw();
+
+		DeltaTime = (SDL_GetTicks() - NewTime) / 1000.0f;
+		
+		if (DeltaTime < TimePerFrameInSeconds)
+		{
+			Uint32 ms = static_cast<Uint32>((TimePerFrameInSeconds - DeltaTime) * 1000.0f);
+			printf("Delay ms %i", ms);
+			SDL_Delay(ms);
 		}
 
-		Draw();
-		SDL_Delay(1);
+		printf("frame %i \n", FrameCount);
+		m_Events.clear();
 	}
 }
 

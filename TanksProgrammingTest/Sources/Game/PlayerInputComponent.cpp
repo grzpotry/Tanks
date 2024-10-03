@@ -21,26 +21,33 @@ void PlayerInputComponent::Initialize()
 
 void PlayerInputComponent::Update(float DeltaTime)
 {
-	const int Speed = 3;
+	constexpr int Speed = 150;
+	const int MoveDistance = Speed * DeltaTime;
+
+	if (MoveDistance == 0)
+	{
+		printf("Can't move player, very small delta time [%f].  ", DeltaTime);
+	}
+	
 	SDL_Rect& Rectangle = m_TextureComponent->GetRectangle();
 	std::vector<SDL_Event> Events = Engine::Get()->GetEvents();
 	const Uint8* Keystates = SDL_GetKeyboardState(NULL);
 
 	//TODO: add some input handling layer
 	if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A]) {
-		Rectangle.x -= Speed;
+		Rectangle.x -= MoveDistance;
 		m_TextureComponent->SetRotationAngle(-90);
 	}
-	if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D]) {
-		Rectangle.x += Speed;
+	else if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D]) {
+		Rectangle.x += MoveDistance;
 		m_TextureComponent->SetRotationAngle(90);
 	}
-	if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP]) {
-		Rectangle.y -= Speed;
+	else if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP]) {
+		Rectangle.y -= MoveDistance;
 		m_TextureComponent->SetRotationAngle(0);
 	}
-	if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN]) {
-		Rectangle.y += Speed;
+	else if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN]) {
+		Rectangle.y += MoveDistance;
 		m_TextureComponent->SetRotationAngle(180);
 	}
 	
