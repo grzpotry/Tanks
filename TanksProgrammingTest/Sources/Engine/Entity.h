@@ -18,6 +18,7 @@ public:
 	void Update(float DeltaTime);
 	void Draw();
 	void UnInitialize();
+	void Destroy();
 
 	void AddComponent(EntityComponent* Component);
 	void RemoveComponent(EntityComponent* Component);
@@ -36,8 +37,11 @@ public:
 	}
 
 	std::string GetName() {return m_Name;}
+
+	bool IsMarkedToDestroy() {return bDestroy;}
 	
 private:
 	std::list<EntityComponent*> m_Components;
 	std::string m_Name;
+	bool bDestroy = false;
 };

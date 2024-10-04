@@ -1,5 +1,5 @@
 #include "Entity.h"
-#include "EntityComponent.h"
+#include "Components/EntityComponent.h"
 #include "Engine.h"
 #include "ResourceManager.h"
 
@@ -54,6 +54,12 @@ void Entity::UnInitialize()
 	{
 		Component->UnInitialize();
 	}
+}
+
+void Entity::Destroy()
+{
+	bDestroy = true;
+	printf("Destroy Entity requested\n");
 }
 
 void Entity::AddComponent(EntityComponent* Component)

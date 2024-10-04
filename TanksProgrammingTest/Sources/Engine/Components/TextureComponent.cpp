@@ -25,7 +25,7 @@ void TextureComponent::LoadFromConfig(nlohmann::json Config)
 	}
 }
 
-void TextureComponent::LoadTexture(std::string Path, std::unique_ptr<SDL_Texture, SdlDeleter>& OutResult)
+void TextureComponent::LoadTexture(std::string Path, std::unique_ptr<SDL_Texture, SDL_Deleter>& OutResult)
 {
 	SDL_Surface* Surface = IMG_Load(Path.c_str());
 

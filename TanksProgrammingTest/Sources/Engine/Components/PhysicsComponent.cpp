@@ -1,7 +1,20 @@
 ﻿#include "PhysicsComponent.h"
 
+#include "Engine.h"
+#include "Entity.h"
+
 void PhysicsComponent::OnCollision(PhysicsComponent* Other)
 {
+    if (GetOwner()->IsMarkedToDestroy())
+    {
+        return;
+    }
+    if (GetOwner()->GetName() == "Projectile" && Other->GetOwner()->GetName() != "Player")
+    {
+        Other->GetOwner()->Destroy();
+        GetOwner()->Destroy();
+       // printf("projectile collision");
+    }
 }
 
 PhysicsComponent::PhysicsComponent() :
@@ -45,7 +58,15 @@ void PhysicsComponent::SetScale(int w, int h)
     m_RectTransform.h = h;
 }
 
-void PhysicsComponent::SetRotationAngle(float angle)
+void PhysicsComponent::SetRotationAngle(float EulerDeg)
 {
-    m_RotationAngle = angle;
+    m_RotationAngle = EulerDeg;
+    
+    const float PI = 3.14159265f;
+    const float AngleRad = EulerDeg * (PI/ 180.0f);
+    
+    float x = std::sin(AngleRad);
+    float y = std::cos(AngleRad);
+
+    m_Forward = Vector2D(x, -y);
 }

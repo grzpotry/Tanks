@@ -6,7 +6,8 @@
 #include "Entity.h"
 #include <nlohmann/json.hpp>
 
-#include "PhysicsComponent.h"
+#include "Vector2D.h"
+#include "Components/PhysicsComponent.h"
 
 class Entity;
 
@@ -25,6 +26,8 @@ public:
 
 	void AddEntity(Entity* Entity);
 	void RemoveEntity(Entity* Entity);
+	void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity);
+	static void InitPhysics(PhysicsComponent* Physics, int PositionX, int PositionY);
 	std::set<PhysicsComponent*> m_DebugCollisions;
 
 	float m_CleanDebugAccumulator;
@@ -34,7 +37,7 @@ private:
 	int QueryDynamicCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj = nullptr, bool bSilent = false);
 	void LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend);
 	
-	std::list<std::unique_ptr<Entity>> m_Entities;
+	std::vector<std::unique_ptr<Entity>> m_Entities;
 	std::vector<PhysicsComponent*> m_StaticTiles;
 	int m_StaticTilesRows = 0;
 	

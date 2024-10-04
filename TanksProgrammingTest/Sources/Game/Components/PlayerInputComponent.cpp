@@ -1,7 +1,7 @@
 #include "PlayerInputComponent.h"
 #include "Entity.h"
 #include "Engine.h"
-#include "PhysicsComponent.h"
+#include "Components/PhysicsComponent.h"
 
 PlayerInputComponent::PlayerInputComponent(Entity* Owner)
 	: EntityComponent(Owner)
@@ -51,10 +51,10 @@ void PlayerInputComponent::Update(float DeltaTime)
 		m_PhysicsComponent->SetRotationAngle(180);
 	}
 
-	int Collisions = Engine::Get()->QueryCollisions(Rectangle, m_PhysicsComponent);
+	const int Collisions = Engine::Get()->QueryCollisions(Rectangle, m_PhysicsComponent);
 	if (Collisions > 0)
 	{
-		//printf("Can't move player %i", Collisions);
+		//can't move player
 	}
 	else
 	{
@@ -62,38 +62,30 @@ void PlayerInputComponent::Update(float DeltaTime)
 		PlayerRect->x = Rectangle.x;
 		PlayerRect->y = Rectangle.y;
 	}
-	
-	// for (const SDL_Event& Event : Events)
-	// {
-	// 	switch (Event.type) 
-	// 	{
-	// 		case SDL_KEYDOWN:
-	// 		{
-	// 			switch (Event.key.keysym.scancode)
-	// 			{
-	// 				case SDL_SCANCODE_W :
-	// 				case SDL_SCANCODE_UP :
-	// 					Rectangle.y -= Speed / 30;
-	// 					break;
-	// 				case SDL_SCANCODE_A :
-	// 				case SDL_SCANCODE_LEFT :
-	// 					Rectangle.x -= Speed / 30;
-	// 					break;
-	// 				case SDL_SCANCODE_S :
-	// 				case SDL_SCANCODE_DOWN :
-	// 					Rectangle.y += Speed / 30;
-	// 					break;
-	// 				case SDL_SCANCODE_D :
-	// 				case SDL_SCANCODE_RIGHT :
-	// 					Rectangle.x += Speed / 30;
-	// 					break;
-	// 				default:
-	// 					break;
-	// 			}
-	// 		}
-	// 	}
-	// }
 
+	for (const SDL_Event& Event : Events)
+	{
+		switch (Event.type) 
+		{
+			case SDL_KEYDOWN:
+			{
+				switch (Event.key.keysym.scancode)
+				{
+					case SDL_SCANCODE_SPACE :
+						{
+							constexpr int ProjectileSpeed = 400;
+							const auto velocity = m_PhysicsComponent->GetForward();
+							Vector2D<int> VelocityInt(velocity.X, velocity.Y);
+							Engine::Get()->AddProjectile(Vector2D(Rectangle.x, Rectangle.y), VelocityInt * ProjectileSpeed);
+						}
+					break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+	
 	int MaxWidth = 0, MaxHeight = 0;
 	SDL_GetWindowSize(Engine::Get()->GetWindow(), &MaxWidth, &MaxHeight);
 

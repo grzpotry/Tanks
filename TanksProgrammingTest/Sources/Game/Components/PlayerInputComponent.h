@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityComponent.h"
+#include "Components/EntityComponent.h"
 
 class PhysicsComponent;
 

@@ -2,6 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
+#include "Vector2D.h"
+
+class PhysicsComponent;
 class Entity;
 
 class EntityComponent
@@ -18,14 +21,15 @@ public:
 	virtual void Draw();
 	virtual void UnInitialize();
 
-	bool IsValid() {return m_Owner != nullptr;}
-
+	constexpr bool IsValid() const {return m_Owner != nullptr;}
+	constexpr Entity* GetOwner() const { return m_Owner; }
 	void SetOwner(Entity* Owner) { m_Owner = Owner; }
-	Entity* GetOwner() { return m_Owner; }
+
 
 protected:
 	~EntityComponent() = default;
 
 private:
+
 	Entity* m_Owner;
 };

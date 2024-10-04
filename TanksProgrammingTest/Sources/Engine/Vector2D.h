@@ -1,0 +1,45 @@
+﻿#pragma once
+#include <complex>
+#include <type_traits>
+
+template <typename T>
+struct Vector2D
+{
+    //static_assert(std::is_floating_point_v<T>, "T must be floating point");
+
+    T X;
+    T Y;
+
+    Vector2D() : X(static_cast<T>(0)), Y(static_cast<T>(0))
+    {
+    }
+
+    Vector2D(T xVal, T yVal) : X(xVal), Y(yVal)
+    {
+    }
+
+    Vector2D operator+(const Vector2D& other) const
+    {
+        return Vector2D(X + other.X, Y + other.Y);
+    }
+
+    Vector2D operator-(const Vector2D& other) const
+    {
+        return Vector2D(X - other.X, Y - other.Y);
+    }
+
+    Vector2D operator*(T scalar) const
+    {
+        return Vector2D(X * scalar, Y * scalar);
+    }
+
+    Vector2D operator/(T scalar) const
+    {
+        return Vector2D(X / scalar, Y / scalar);
+    }
+
+    T magnitude() const
+    {
+        return std::sqrt(X * X + Y * Y);
+    }
+};

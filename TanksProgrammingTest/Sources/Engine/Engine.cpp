@@ -160,3 +160,12 @@ int Engine::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceO
 {
 	return m_ActiveScene->QueryCollisions(SourceRect, SourceObj);
 }
+
+void Engine::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const
+{
+	if (m_ActiveScene)
+	{
+		m_ActiveScene->AddProjectile(Position, Velocity);
+	}
+}
+

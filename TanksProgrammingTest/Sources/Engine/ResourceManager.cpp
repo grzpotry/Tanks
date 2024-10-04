@@ -1,7 +1,7 @@
 #include "ResourceManager.h"
 #include "EngineUtils.h"
 #include "Entity.h"
-#include "EntityComponent.h"
+#include "Components/EntityComponent.h"
 #include <filesystem>
 #include <fstream>
 #include <regex>

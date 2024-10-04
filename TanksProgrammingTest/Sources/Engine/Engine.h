@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>
 
+#include "Entity.h"
+#include "Vector2D.h"
+
 class PhysicsComponent;
 class Scene;
 class ResourceManager;
@@ -31,6 +34,7 @@ public:
 	void CreateActiveSceneFromTemplate(std::string Name);
 
 	int QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj) const;
+	void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const;
 
 private:
 	Engine();

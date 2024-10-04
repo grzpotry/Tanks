@@ -3,7 +3,10 @@
 #include "ResourceManager.h"
 #include <fstream>
 #include <iostream>
-#include "PhysicsComponent.h"
+
+#include "Vector2D.h"
+#include "../Game/Components/ProjectileMovementComponent.h"
+#include "Components/PhysicsComponent.h"
 
 void Scene::LoadFromConfig(nlohmann::json Config)
 {
@@ -173,9 +176,20 @@ int Scene::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceOb
 
 void Scene::Update(float DeltaTime)
 {
-	for (const auto& Entity : m_Entities)
+	printf("Entities: %i \n", m_Entities.size());
+
+	for (int i = (int)m_Entities.size() - 1; i >=0; i--)
 	{
-		Entity->Update(DeltaTime);
+		auto Entity = *m_Entities[i];
+
+		if (Entity.IsMarkedToDestroy())
+		{
+			//TODO: not called ever, investigate bug
+			Entity.UnInitialize();
+			m_Entities.erase(m_Entities.begin() + i);
+		}
+
+		Entity.Update(DeltaTime);
 	}
 	
 	m_CleanDebugAccumulator += DeltaTime;
@@ -232,17 +246,35 @@ void Scene::AddEntity(Entity* Entity)
 	m_Entities.push_back(std::make_unique<::Entity>(*Entity));
 }
 
-void Scene::RemoveEntity(Entity* Entity)
+void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity)
 {
-	// Find the unique_ptr that holds the raw pointer
-	auto it = std::find_if(m_Entities.begin(), m_Entities.end(),
-		[Entity](const std::unique_ptr<::Entity>& entityPtr) {
-			return entityPtr.get() == Entity;
-		});
-	
-	if (it != m_Entities.end()) {
-		m_Entities.erase(it);
+	ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
+	Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile");
+
+	if (PhysicsComponent* Physics = NewEntity->GetComponent<PhysicsComponent>())
+	{
+		InitPhysics(Physics, Position.X, Position.Y);
+		m_DynamicComponents.push_back(Physics); //todo: merge to single place
+		printf("Inited projectile at pos %i %i", Position.X, Position.Y);
 	}
+
+	if (ProjectileMovementComponent* Projectile = NewEntity->GetComponent<ProjectileMovementComponent>())
+	{
+		Projectile->SetVelocity(Velocity);
+	}
+
+	AddEntity(NewEntity);
+
+	NewEntity->Initialize();
+
+	printf("Added projectile");
+}
+
+void Scene::InitPhysics(PhysicsComponent* Physics, int PositionX, int PositionY)
+{
+	const SDL_Rect Rect = Physics->GetRectTransform();
+	Physics->SetPosition(PositionX, PositionY);
+	Physics->SetScale(Rect.w, Rect.h);
 }
 
 void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
@@ -279,10 +311,9 @@ void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
 	
 				Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
 				PhysicsComponent* PhysicsComponentPtr = NewEntity->GetComponent<PhysicsComponent>();
-				
 				const SDL_Rect Rect = PhysicsComponentPtr->GetRectTransform();
-				PhysicsComponentPtr->SetPosition(Column * Rect.w, Row * Rect.h);
-				PhysicsComponentPtr->SetScale(Rect.w, Rect.h);
+				
+				InitPhysics(PhysicsComponentPtr, Column * Rect.w, Row * Rect.h);
 				AddEntity(NewEntity);
 			}
 			++Column;

@@ -1,0 +1,18 @@
+{
+	"Name": "Projectile",
+	"Components": [
+		{
+			"Type": "TextureComponent",
+			"Texture": "Bullet.png"
+		},
+		{
+			"Type": "ProjectileMovementComponent"
+		},
+		{
+			"Type": "PhysicsComponent",
+			"IsStatic": false,
+			"Width": 10,
+			"Height": 10
+		}
+	]
+}

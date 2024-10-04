@@ -1,7 +1,8 @@
 #include "Engine.h"
 #include "ResourceManager.h"
-#include "TextureComponent.h"
-#include "PlayerInputComponent.h"
+#include "Components/TextureComponent.h"
+#include "Components/PlayerInputComponent.h"
+#include "Components/ProjectileMovementComponent.h"
 
 int main(int argc, char* argv[])
 {
@@ -11,6 +12,7 @@ int main(int argc, char* argv[])
 	ResourceManagerPtr->RegisterComponent("PlayerInputComponent", new PlayerInputComponent());
 	ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureComponent());
 	ResourceManagerPtr->RegisterComponent("PhysicsComponent", new PhysicsComponent());
+	ResourceManagerPtr->RegisterComponent("ProjectileMovementComponent", new ProjectileMovementComponent());
 
 	Engine::Get()->CreateActiveSceneFromTemplate("MainScene");
 
