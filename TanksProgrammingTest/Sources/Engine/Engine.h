@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 
+class PhysicsComponent;
 class Scene;
 class ResourceManager;
 
@@ -28,6 +29,8 @@ public:
 	const std::vector<SDL_Event>& GetEvents() { return m_Events; }
 	void SetActiveScene(Scene* Scene) { m_ActiveScene = Scene; }
 	void CreateActiveSceneFromTemplate(std::string Name);
+
+	int QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj) const;
 
 private:
 	Engine();

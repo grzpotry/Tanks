@@ -1,12 +1,13 @@
 #include "Scene.h"
-#include "Entity.h"
 #include "Engine.h"
 #include "ResourceManager.h"
-#include "TextureComponent.h"
 #include <fstream>
+#include <iostream>
+#include "PhysicsComponent.h"
 
 void Scene::LoadFromConfig(nlohmann::json Config)
 {
+	printf("LoadSceneFromConfig \n");
 	m_Name = Config.value("Name", "");
 
 	if (Config.find("Entities") != Config.end())
@@ -38,52 +39,233 @@ void Scene::LoadFromConfig(nlohmann::json Config)
 	}
 }
 
+int Scene::GetTileIndex(const int Row, const int Col) const
+{
+	return (Row * m_StaticTilesRows) + Col;
+}
+
 void Scene::Initialize()
 {
-	for (Entity* Entity : m_Entities)
+	for (const auto& Entity : m_Entities)
 	{
 		Entity->Initialize();
 	}
+
+	for (const auto& Entity : m_Entities)
+	{
+		if (PhysicsComponent* Physics = Entity->GetComponent<PhysicsComponent>())
+		{
+			if (Physics->IsStatic())
+			{
+				auto Rect = Physics->GetRectTransform();
+				const int Row = Rect.x / Rect.w;
+				const int Col = Rect.y / Rect.h;
+				const int index = GetTileIndex(Row, Col);
+
+				if (index >= static_cast<int>(m_StaticTiles.size())) {
+					m_StaticTiles.resize(index + 1);
+				}
+
+				assert (m_StaticTiles[index] == nullptr);
+
+				m_StaticTiles[index] = Physics;
+				//printf("Add tile %i %s size %i %i pos %i %i \n", index, Entity->GetName().c_str(), Rect.w, Rect.h, Rect.x, Rect.y);
+			}
+			else
+			{
+				m_DynamicComponents.push_back(Physics);
+			}
+		}
+	}
+}
+
+/*
+ * static tiles are laid out on grid so we can limit possible collision checks only to tiles in neighbourhood
+ */
+int Scene::QueryStaticCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj, bool bSilent)
+{
+	//TODO: hardcoded size of static tile, add support for more sizes based on entities data
+	constexpr int CellWidth = 30;
+	constexpr int CellHeigh = 35;
+
+	const int StartCellX = SourceRect.x / CellWidth;
+	const int StartCellY = SourceRect.y / CellHeigh;
+
+	// more greedy check on end since pivot is in upper-left corner
+	const int EndCellX = (SourceRect.x + SourceRect.w) / CellWidth + 1;
+	const int EndCellY = (SourceRect.y + SourceRect.h) / CellHeigh + 1;
+
+	int CollisionsCounter = 0;
+	
+	for (int i = StartCellX; i < EndCellX; i++)
+	{
+		for (int j = StartCellY; j < EndCellY; j++)
+		{
+			const int TileIndex = GetTileIndex(i, j);
+
+			if (TileIndex > static_cast<int>(m_StaticTiles.size()))
+			{
+				continue;
+			}
+
+			if (PhysicsComponent* Target = m_StaticTiles.at(TileIndex); Target != nullptr && Target != SourceObj &&
+				SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
+			{
+				CollisionsCounter++;
+
+				if (SourceObj && !bSilent)
+				{
+					SourceObj->OnCollision(Target);
+					Target->OnCollision(SourceObj);
+				}
+
+				m_DebugCollisions.emplace(Target);
+			}
+		}
+	}
+
+	return CollisionsCounter;
+}
+
+/*
+ * Number of dynamic entities is expected to be low so brute force check should be sufficient for now.
+ * Can be optimized in future by introducing some spatial data structure eg. (Quadtree or Bounding Volume Hierarchies)
+ */
+int Scene::QueryDynamicCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj, bool bSilent)
+{
+	int CollisionsCounter = 0;
+	
+	for (const auto Target : m_DynamicComponents)
+	{
+		if (SourceObj == Target)
+		{
+			continue;
+		}
+
+		//TODO: optimize to skip some checks
+		if (SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
+		{
+			CollisionsCounter++;
+			
+			if (SourceObj && !bSilent)
+			{
+				SourceObj->OnCollision(Target);
+				Target->OnCollision(SourceObj);
+			}
+
+			m_DebugCollisions.emplace(Target);
+		}
+	}
+
+	return CollisionsCounter;
+}
+
+
+int Scene::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj)
+{
+	int CollisionsCounter = 0;
+
+	CollisionsCounter += QueryDynamicCollisions(SourceRect, SourceObj, false);
+	CollisionsCounter += QueryStaticCollisions(SourceRect, SourceObj, false);
+
+	return CollisionsCounter;
 }
 
 void Scene::Update(float DeltaTime)
 {
-	for (Entity* Entity : m_Entities)
+	for (const auto& Entity : m_Entities)
 	{
 		Entity->Update(DeltaTime);
+	}
+	
+	m_CleanDebugAccumulator += DeltaTime;
+
+	if (m_CleanDebugAccumulator > 1)
+	{
+		m_DebugCollisions.clear();
+		m_CleanDebugAccumulator = 0;
+	}
+	
+	for (const auto ObjA : m_DynamicComponents)
+	{
+		QueryDynamicCollisions(ObjA->GetRectTransform(), ObjA, false);
+		QueryStaticCollisions(ObjA->GetRectTransform(), ObjA, false);
+	}
+}
+
+void Scene::DrawDebugCollisions()
+{
+	for (auto element : m_DebugCollisions)
+	{
+		auto rect_transform = element->GetRectTransform();
+		Uint8 prevR, prevG, prevB, prevA;
+		
+		SDL_GetRenderDrawColor(Engine::Get()->GetRenderer(), &prevR, &prevG, &prevB, &prevA);
+		SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), 255, 00, 00, 255);
+		SDL_RenderFillRect(Engine::Get()->GetRenderer(), &rect_transform);
+		SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), prevR, prevG, prevB, prevA);
 	}
 }
 
 void Scene::Draw()
 {
-	for (Entity* Entity : m_Entities)
+	for (const auto& Entity : m_Entities)
 	{
 		Entity->Draw();
 	}
+	
+	DrawDebugCollisions();
 }
 
 void Scene::UnInitialize()
 {
-	for (Entity* Entity : m_Entities)
+	for (const auto& Entity : m_Entities)
 	{
 		Entity->UnInitialize();
 	}
+	
+	m_Entities.clear();
 }
 
 void Scene::AddEntity(Entity* Entity)
 {
-	m_Entities.push_back(Entity);
+	m_Entities.push_back(std::make_unique<::Entity>(*Entity));
 }
 
 void Scene::RemoveEntity(Entity* Entity)
 {
-	m_Entities.remove(Entity);
+	// Find the unique_ptr that holds the raw pointer
+	auto it = std::find_if(m_Entities.begin(), m_Entities.end(),
+		[Entity](const std::unique_ptr<::Entity>& entityPtr) {
+			return entityPtr.get() == Entity;
+		});
+	
+	if (it != m_Entities.end()) {
+		m_Entities.erase(it);
+	}
 }
 
 void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
 {
+	printf("LoadSceneFromLayout \n");
+	
 	int Row = 0;
 	ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
+	
+	m_StaticTilesRows = 0;
+	int MaxCols = 0;
+	
+	for (auto Item : Content.items())
+	{
+		const std::string& Line = Item.value();
+		MaxCols = std::max(MaxCols, static_cast<int>(Line.length()));
+		m_StaticTilesRows++;
+	}
+
+	int Capacity = m_StaticTilesRows * MaxCols;
+	m_StaticTiles.resize(Capacity);
+	printf("Reserved %i", Capacity);
+	
 	for (auto Item : Content.items())
 	{
 		int Column = 0;
@@ -94,13 +276,13 @@ void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
 			{
 				const char Key[] = { Character, '\0' };
 				nlohmann::json EntitySpecs = Legend[Key];
-
+	
 				Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
-				TextureComponent* TextureComponentPtr = NewEntity->GetComponent<TextureComponent>();
-				int Width = EntitySpecs["Width"];
-				int Height = EntitySpecs["Height"];
-				TextureComponentPtr->SetPosition(Column * Width, Row * Height);
-				TextureComponentPtr->SetScale(Width, Height);
+				PhysicsComponent* PhysicsComponentPtr = NewEntity->GetComponent<PhysicsComponent>();
+				
+				const SDL_Rect Rect = PhysicsComponentPtr->GetRectTransform();
+				PhysicsComponentPtr->SetPosition(Column * Rect.w, Row * Rect.h);
+				PhysicsComponentPtr->SetScale(Rect.w, Rect.h);
 				AddEntity(NewEntity);
 			}
 			++Column;

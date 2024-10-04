@@ -1,14 +1,17 @@
 {
-	"Name" : "Wall",
-	"Components" : 
-	[
+	"Name": "Wall",
+	"Components": [
 		{
-			"Type" : "TextureComponent",
-			"Texture" : "BrickWall.png",
-			"Width" : 30,
-			"Height" : 35,
-			"PositionX" : 0,
-			"PositionY" : 0
+			"Type": "TextureComponent",
+			"Texture": "BrickWall.png"
+		},
+		{
+			"Type": "PhysicsComponent",
+			"IsStatic": true,
+			"Width": 30,
+			"Height": 35,
+			"PositionX": 0,
+			"PositionY": 0
 		}
 	]
 }

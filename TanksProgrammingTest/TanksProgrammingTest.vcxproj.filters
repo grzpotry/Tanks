@@ -72,4 +72,12 @@
       <Filter>Source Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="External\SDL2_ttf-2.22.0\lib\x64\SDL2_ttf.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="External\SDL2_image-2.0.5\lib\x64\SDL2_image.dll">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -1,17 +1,20 @@
 {
-	"Name" : "Player",
-	"Components" : 
-	[
+	"Name": "Player",
+	"Components": [
 		{
-			"Type" : "TextureComponent",
-			"Texture" : "RedTankFront.png",
-			"Width" : 50,
-			"Height" : 45,
-			"PositionX" : 300,
-			"PositionY" : 480
+			"Type": "TextureComponent",
+			"Texture": "RedTankFront.png"
 		},
 		{
-			"Type" : "PlayerInputComponent"
+			"Type": "PlayerInputComponent"
+		},
+		{
+			"Type": "PhysicsComponent",
+			"IsStatic": false,
+			"Width": 30,
+			"Height": 30,
+			"PositionX": 300,
+			"PositionY": 480
 		}
 	]
 }

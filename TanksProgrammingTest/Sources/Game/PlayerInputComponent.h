@@ -2,7 +2,7 @@
 
 #include "EntityComponent.h"
 
-class TextureComponent;
+class PhysicsComponent;
 
 class PlayerInputComponent : public EntityComponent
 {
@@ -17,5 +17,5 @@ public:
 	virtual void Update(float DeltaTime) override;
 
 private:
-	TextureComponent* m_TextureComponent;
+	PhysicsComponent* m_PhysicsComponent;
 };

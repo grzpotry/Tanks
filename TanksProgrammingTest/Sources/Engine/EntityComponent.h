@@ -18,6 +18,8 @@ public:
 	virtual void Draw();
 	virtual void UnInitialize();
 
+	bool IsValid() {return m_Owner != nullptr;}
+
 	void SetOwner(Entity* Owner) { m_Owner = Owner; }
 	Entity* GetOwner() { return m_Owner; }
 

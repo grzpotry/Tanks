@@ -1,14 +1,17 @@
 {
-	"Name" : "StoneWall",
-	"Components" : 
-	[
+	"Name": "StoneWall",
+	"Components": [
 		{
-			"Type" : "TextureComponent",
-			"Texture" : "StoneWall.png",
-			"Width" : 30,
-			"Height" : 35,
-			"PositionX" : 0,
-			"PositionY" : 0
+			"Type": "TextureComponent",
+			"Texture": "StoneWall.png"
+		},
+		{
+			"Type": "PhysicsComponent",
+			"IsStatic": true,
+			"Width": 30,
+			"Height": 35,
+			"PositionX": 0,
+			"PositionY": 0
 		}
 	]
 }

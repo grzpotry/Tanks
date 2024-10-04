@@ -1,30 +1,20 @@
 {
-	"Name" : "MainScene",
-	"Entities" : 
-	[
+	"Name": "MainScene",
+	"Entities": [
 		{
-			"Type" : "Player"
+			"Type": "Player"
 		}
 	],
-	"SceneLayout" : 
-	{
-		"Legend" :
-		{
-			"*" : 
-			{
-				"Type" : "Wall",
-				"Width" : 30,
-				"Height" : 35
+	"SceneLayout": {
+		"Legend": {
+			"*": {
+				"Type": "Wall"
 			},
-			"+" :
-			{
-				"Type" : "StoneWall",
-				"Width" : 30,
-				"Height" : 35
+			"+": {
+				"Type": "StoneWall"
 			}
 		},
-		"Content" :
-		[
+		"Content": [
 			"+++++++++++++++++++++++++++++",
 			"+                           +",
 			"+ +++   ****     *****  +++ +",

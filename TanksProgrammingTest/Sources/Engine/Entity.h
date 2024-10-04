@@ -7,8 +7,12 @@ class EntityComponent;
 
 class Entity
 {
-
 public:
+
+	~Entity()
+	{
+	}
+	
 	void LoadFromConfig(nlohmann::json Config);
 	void Initialize();
 	void Update(float DeltaTime);
@@ -30,6 +34,8 @@ public:
 		}
 		return nullptr;
 	}
+
+	std::string GetName() {return m_Name;}
 	
 private:
 	std::list<EntityComponent*> m_Components;

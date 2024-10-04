@@ -86,7 +86,7 @@ void Engine::MainLoop()
 			}
 		}
 
-		constexpr int MaxUpdatesPerFrame = 5;
+		constexpr int MaxUpdatesPerFrame = 1;
 		int UpdateCount = 0;
 		
 		while (FixedUpdateAccumulator >= TimePerFrameInSeconds && UpdateCount < MaxUpdatesPerFrame)
@@ -109,18 +109,18 @@ void Engine::MainLoop()
 		if (DeltaTime < TimePerFrameInSeconds)
 		{
 			Uint32 ms = static_cast<Uint32>((TimePerFrameInSeconds - DeltaTime) * 1000.0f);
-			printf("Delay ms %i", ms);
+			//printf("Frame rendered in %i", ms);
 			SDL_Delay(ms);
 		}
 
-		printf("frame %i \n", FrameCount);
+		//printf("frame %i \n", FrameCount);
 		m_Events.clear();
 	}
 }
 
 void Engine::Draw()
 {
-	SDL_RenderClear(m_Renderer);
+	SDL_RenderClear(m_Renderer);//back to draw
 
 	if (m_ActiveScene != nullptr)
 	{
@@ -154,4 +154,9 @@ void Engine::CreateActiveSceneFromTemplate(std::string Name)
 
 		m_ActiveScene = SceneFromTemplate;
 	}
+}
+
+int Engine::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj) const
+{
+	return m_ActiveScene->QueryCollisions(SourceRect, SourceObj);
 }
