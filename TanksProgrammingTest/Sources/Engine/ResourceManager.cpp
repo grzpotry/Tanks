@@ -47,12 +47,12 @@ const EntityComponent* ResourceManager::GetComponentPrototypeByName(std::string 
 	return nullptr;
 }
 
-Entity* ResourceManager::CreateEntityFromDataTemplate(std::string Name)
+std::unique_ptr<Entity> ResourceManager::CreateEntityFromDataTemplate(std::string Name)
 {
 	std::map<std::string, nlohmann::json>::iterator EntityDataTemplateIt = m_Entities.find(Name);
 	if (EntityDataTemplateIt != m_Entities.end())
 	{
-		Entity* NewEntity = new Entity();
+		auto NewEntity = std::make_unique<Entity>();
 		NewEntity->LoadFromConfig(EntityDataTemplateIt->second);
 		return NewEntity;
 	}

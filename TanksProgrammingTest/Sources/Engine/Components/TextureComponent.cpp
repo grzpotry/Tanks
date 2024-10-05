@@ -6,7 +6,7 @@
 class PhysicsComponent;
 
 TextureComponent::TextureComponent(Entity* Owner)
-	: EntityComponent(Owner), m_PhysicsComponent(nullptr)
+	: EntityComponent(Owner)
 {
 }
 
@@ -41,7 +41,7 @@ void TextureComponent::LoadTexture(std::string Path, std::unique_ptr<SDL_Texture
 
 void TextureComponent::Initialize()
 {
-	m_PhysicsComponent = GetOwner()->GetComponent<PhysicsComponent>();
+	m_PhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
 	LoadTexture(m_TexturePath, m_TexturePtr);
 }
 
@@ -52,10 +52,13 @@ void TextureComponent::UnInitialize()
 
 void TextureComponent::Draw()
 {
-	if (m_PhysicsComponent && m_TexturePtr)
+	if (const auto sharedComponent =m_PhysicsComponent.lock() )
 	{
-		const SDL_Point Center = m_PhysicsComponent->GetCenter();
-		SDL_RenderCopyEx(Engine::Get()->GetRenderer(), m_TexturePtr.get(), nullptr, &m_PhysicsComponent->GetRectTransform(), m_PhysicsComponent->GetRotationAngle(), &Center, SDL_FLIP_NONE);
+		if (m_TexturePtr)
+		{
+			const SDL_Point Center = sharedComponent->GetCenter();
+			SDL_RenderCopyEx(Engine::Get()->GetRenderer(), m_TexturePtr.get(), nullptr, &sharedComponent->GetRectTransform(), sharedComponent->GetRotationAngle(), &Center, SDL_FLIP_NONE);
+		}
 	}
 }
 

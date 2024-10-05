@@ -21,9 +21,13 @@ public:
 	TextureComponent(Entity* Owner);
 	TextureComponent();
 
+	~TextureComponent()
+	{
+		m_TexturePtr = nullptr;
+	}
+
 	TextureComponent(const TextureComponent& other)
 		: EntityComponent(other),
-		  m_PhysicsComponent(nullptr),
 		  m_TexturePath(other.m_TexturePath)
 	{
 		if (m_TexturePath.length() > 0)
@@ -34,7 +38,6 @@ public:
 
 	TextureComponent(TextureComponent&& other) noexcept:
 		EntityComponent(static_cast<EntityComponent&>(other)),
-		m_PhysicsComponent(nullptr),
 		m_TexturePath(std::move(other.m_TexturePath)),
 		m_TexturePtr(std::move(other.m_TexturePtr))
 	{
@@ -67,9 +70,8 @@ public:
 		other.m_TexturePtr = nullptr;
 		return *this;
 	}
-
-
-	EntityComponent* Clone() const override { return new TextureComponent(*this); }
+	
+	std::unique_ptr<EntityComponent> Clone() const override { return std::make_unique<TextureComponent>(*this); }
 	void LoadFromConfig(nlohmann::json Config) override;
 	void Initialize() override;
 	void UnInitialize() override;
@@ -80,13 +82,9 @@ public:
 	static void LoadTexture(std::string Path, std::unique_ptr<SDL_Texture, SDL_Deleter>& OutResult);
 
 protected:
-	~TextureComponent()
-	{
-		m_TexturePtr = nullptr;
-	}
 
 private:
-	PhysicsComponent* m_PhysicsComponent;
+	std::weak_ptr<PhysicsComponent> m_PhysicsComponent;
 	std::string m_TexturePath;
 	std::unique_ptr<SDL_Texture, SDL_Deleter> m_TexturePtr;
 	

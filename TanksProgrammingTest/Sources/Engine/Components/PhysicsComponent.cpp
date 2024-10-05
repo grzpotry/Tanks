@@ -3,16 +3,16 @@
 #include "Engine.h"
 #include "Entity.h"
 
-void PhysicsComponent::OnCollision(PhysicsComponent* Other)
+void PhysicsComponent::OnCollision(std::shared_ptr<PhysicsComponent> Other)
 {
-    if (GetOwner()->IsMarkedToDestroy())
+    if (GetOwner()->IsPendingDestroy() || Other->GetOwner()->IsPendingDestroy())
     {
         return;
     }
     if (GetOwner()->GetName() == "Projectile" && Other->GetOwner()->GetName() != "Player")
     {
-        Other->GetOwner()->Destroy();
-        GetOwner()->Destroy();
+        Other->GetOwner()->MarkDestroy();
+        GetOwner()->MarkDestroy();
        // printf("projectile collision");
     }
 }
@@ -68,5 +68,6 @@ void PhysicsComponent::SetRotationAngle(float EulerDeg)
     float x = std::sin(AngleRad);
     float y = std::cos(AngleRad);
 
+    // origin is in top-left so invert Y axis to treat "UP screen direction" as UP dir in game
     m_Forward = Vector2D(x, -y);
 }

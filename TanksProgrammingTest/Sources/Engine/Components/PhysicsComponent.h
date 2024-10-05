@@ -50,9 +50,9 @@ public:
         return *this;
     }
 
-    void OnCollision(PhysicsComponent* Other);
+    void OnCollision(std::shared_ptr<PhysicsComponent> Other);
     void LoadFromConfig(nlohmann::json Config) override;
-    EntityComponent* Clone() const override { return new PhysicsComponent(*this); }
+    std::unique_ptr<EntityComponent> Clone() const override { return std::make_unique<PhysicsComponent>(*this); }
     
     void SetPosition(int x, int y);
     void SetScale(int w, int h);

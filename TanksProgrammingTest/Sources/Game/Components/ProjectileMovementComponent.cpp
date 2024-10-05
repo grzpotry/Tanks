@@ -4,7 +4,7 @@
 
 void ProjectileMovementComponent::Initialize()
 {
-    m_PhysicsComponent = GetOwner()->GetComponent<PhysicsComponent>();
+    m_PhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
 }
 
 void ProjectileMovementComponent::SetVelocity(Vector2D<int> Velocity)
@@ -14,6 +14,8 @@ void ProjectileMovementComponent::SetVelocity(Vector2D<int> Velocity)
 
 void ProjectileMovementComponent::Update(float DeltaTime)
 {
-    auto Rect = m_PhysicsComponent->GetRectTransform();
-    m_PhysicsComponent->SetPosition(Rect.x + (int)(m_Velocity.X * DeltaTime), Rect.y + (int)(m_Velocity.Y * DeltaTime));
+    if (const auto PhysicsComponent = m_PhysicsComponent.lock()) {
+        auto Rect = PhysicsComponent->GetRectTransform();
+        PhysicsComponent->SetPosition(Rect.x + (int)(m_Velocity.X * DeltaTime), Rect.y + (int)(m_Velocity.Y * DeltaTime));
+    }
 }

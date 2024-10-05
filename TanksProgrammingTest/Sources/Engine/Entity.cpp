@@ -16,17 +16,18 @@ void Entity::LoadFromConfig(nlohmann::json Config)
 			nlohmann::json ComponentConfig = ComponentItem.value();
 			std::string Type = ComponentConfig["Type"];
 			const EntityComponent* ComponentPrototype = ResourceManagerPtr->GetComponentPrototypeByName(Type);
-			EntityComponent* NewComponent = ComponentPrototype->Clone();
+			std::unique_ptr<EntityComponent> NewComponent = ComponentPrototype->Clone();
+			
 			NewComponent->SetOwner(this);
 			NewComponent->LoadFromConfig(ComponentConfig);
-			AddComponent(NewComponent);
+			AddComponent(std::move(NewComponent));
 		}
 	}
 }
 
 void Entity::Initialize()
 {
-	for (EntityComponent* Component : m_Components)
+	for (const auto& Component : m_Components)
 	{
 		Component->Initialize();
 	}
@@ -34,7 +35,7 @@ void Entity::Initialize()
 
 void Entity::Update(float DeltaTime)
 {
-	for (EntityComponent* Component : m_Components)
+	for (const auto& Component : m_Components)
 	{
 		Component->Update(DeltaTime);
 	}
@@ -42,7 +43,7 @@ void Entity::Update(float DeltaTime)
 
 void Entity::Draw()
 {
-	for (EntityComponent* Component : m_Components)
+	for (const auto& Component : m_Components)
 	{
 		Component->Draw();
 	}
@@ -50,7 +51,7 @@ void Entity::Draw()
 
 void Entity::UnInitialize()
 {
-	for (EntityComponent* Component : m_Components)
+	for (const auto& Component : m_Components)
 	{
 		Component->UnInitialize();
 	}
@@ -58,16 +59,24 @@ void Entity::UnInitialize()
 
 void Entity::Destroy()
 {
-	bDestroy = true;
+	//printf("Destroy Entity\n");
+	UnInitialize();
+	m_Components.clear();
+}
+
+void Entity::MarkDestroy()
+{
+	bPendingDestroy = true;
 	printf("Destroy Entity requested\n");
 }
 
-void Entity::AddComponent(EntityComponent* Component)
+void Entity::AddComponent(std::unique_ptr<EntityComponent> Component)
 {
-	m_Components.push_back(Component);
+	printf("AddComponent \n");
+	m_Components.push_back(std::move(Component));
 }
 
 void Entity::RemoveComponent(EntityComponent* Component)
 {
-	m_Components.remove(Component);
+	//m_Components.remove(Component);
 }

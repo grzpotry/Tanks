@@ -156,7 +156,7 @@ void Engine::CreateActiveSceneFromTemplate(std::string Name)
 	}
 }
 
-int Engine::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj) const
+int Engine::QueryCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const SourceObj) const
 {
 	return m_ActiveScene->QueryCollisions(SourceRect, SourceObj);
 }

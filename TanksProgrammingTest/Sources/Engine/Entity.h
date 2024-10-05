@@ -8,40 +8,37 @@ class EntityComponent;
 class Entity
 {
 public:
-
-	~Entity()
-	{
-	}
 	
 	void LoadFromConfig(nlohmann::json Config);
 	void Initialize();
 	void Update(float DeltaTime);
 	void Draw();
 	void UnInitialize();
+	void MarkDestroy();
 	void Destroy();
 
-	void AddComponent(EntityComponent* Component);
+	void AddComponent(std::unique_ptr<EntityComponent> Component);
 	void RemoveComponent(EntityComponent* Component);
 
 	template <typename ComponentType>
-	ComponentType* GetComponent()
+	std::weak_ptr<ComponentType> GetComponentWeak()
 	{
-		for (EntityComponent* Component : m_Components)
+		for (auto& Component : m_Components)
 		{
-			if (ComponentType* TypedComponent = dynamic_cast<ComponentType*>(Component))
+			if (auto TypedComponent = std::dynamic_pointer_cast<ComponentType>(Component))
 			{
 				return TypedComponent;
 			}
 		}
-		return nullptr;
+		return std::weak_ptr<ComponentType>();
 	}
 
 	std::string GetName() {return m_Name;}
 
-	bool IsMarkedToDestroy() {return bDestroy;}
+	bool IsPendingDestroy() {return bPendingDestroy;}
 	
 private:
-	std::list<EntityComponent*> m_Components;
+	std::list<std::shared_ptr<EntityComponent>> m_Components;
 	std::string m_Name;
-	bool bDestroy = false;
+	bool bPendingDestroy = false;
 };

@@ -18,7 +18,7 @@ void Scene::LoadFromConfig(nlohmann::json Config)
 		ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
 		for (auto Item : Config["Entities"].items())
 		{
-			Entity* NewEntity = new Entity();
+			auto NewEntity = std::make_unique<Entity>();
 
 			nlohmann::json EntityConfig = Item.value();
 			std::string TypeName = EntityConfig.value("Type", "");
@@ -32,7 +32,7 @@ void Scene::LoadFromConfig(nlohmann::json Config)
 				NewEntity->LoadFromConfig(Item.value());
 			}
 
-			AddEntity(NewEntity);
+			AddEntity(std::move(NewEntity));
 		}
 	}
 
@@ -56,7 +56,7 @@ void Scene::Initialize()
 
 	for (const auto& Entity : m_Entities)
 	{
-		if (PhysicsComponent* Physics = Entity->GetComponent<PhysicsComponent>())
+		if (auto Physics = Entity->GetComponentWeak<PhysicsComponent>().lock())
 		{
 			if (Physics->IsStatic())
 			{
@@ -69,7 +69,7 @@ void Scene::Initialize()
 					m_StaticTiles.resize(index + 1);
 				}
 
-				assert (m_StaticTiles[index] == nullptr);
+				//assert (m_StaticTiles[index] == nullptr);
 
 				m_StaticTiles[index] = Physics;
 				//printf("Add tile %i %s size %i %i pos %i %i \n", index, Entity->GetName().c_str(), Rect.w, Rect.h, Rect.x, Rect.y);
@@ -85,7 +85,7 @@ void Scene::Initialize()
 /*
  * static tiles are laid out on grid so we can limit possible collision checks only to tiles in neighbourhood
  */
-int Scene::QueryStaticCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj, bool bSilent)
+int Scene::QueryStaticCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const& SourceObj, bool bSilent)
 {
 	//TODO: hardcoded size of static tile, add support for more sizes based on entities data
 	constexpr int CellWidth = 30;
@@ -106,12 +106,12 @@ int Scene::QueryStaticCollisions(SDL_Rect SourceRect, PhysicsComponent* const So
 		{
 			const int TileIndex = GetTileIndex(i, j);
 
-			if (TileIndex > static_cast<int>(m_StaticTiles.size()))
+			if (TileIndex > static_cast<int>(m_StaticTiles.size()) || TileIndex < 0)
 			{
 				continue;
 			}
 
-			if (PhysicsComponent* Target = m_StaticTiles.at(TileIndex); Target != nullptr && Target != SourceObj &&
+			if (auto Target = m_StaticTiles.at(TileIndex).lock(); Target != nullptr && Target != SourceObj &&
 				SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
 			{
 				CollisionsCounter++;
@@ -134,29 +134,32 @@ int Scene::QueryStaticCollisions(SDL_Rect SourceRect, PhysicsComponent* const So
  * Number of dynamic entities is expected to be low so brute force check should be sufficient for now.
  * Can be optimized in future by introducing some spatial data structure eg. (Quadtree or Bounding Volume Hierarchies)
  */
-int Scene::QueryDynamicCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj, bool bSilent)
+int Scene::QueryDynamicCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const SourceObj, bool bSilent)
 {
 	int CollisionsCounter = 0;
 	
-	for (const auto Target : m_DynamicComponents)
+	for (const auto& TargetPtr : m_DynamicComponents)
 	{
-		if (SourceObj == Target)
+		if (auto Target = TargetPtr.lock())
 		{
-			continue;
-		}
-
-		//TODO: optimize to skip some checks
-		if (SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
-		{
-			CollisionsCounter++;
-			
-			if (SourceObj && !bSilent)
+			if (SourceObj == Target)
 			{
-				SourceObj->OnCollision(Target);
-				Target->OnCollision(SourceObj);
+				continue;
 			}
 
-			m_DebugCollisions.emplace(Target);
+			//TODO: optimize to skip some checks
+			if (SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
+			{
+				CollisionsCounter++;
+			
+				if (SourceObj && !bSilent)
+				{
+					SourceObj->OnCollision(Target);
+					Target->OnCollision(SourceObj);
+				}
+
+				m_DebugCollisions.emplace(TargetPtr);
+			}
 		}
 	}
 
@@ -164,7 +167,7 @@ int Scene::QueryDynamicCollisions(SDL_Rect SourceRect, PhysicsComponent* const S
 }
 
 
-int Scene::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj)
+int Scene::QueryCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const SourceObj)
 {
 	int CollisionsCounter = 0;
 
@@ -176,20 +179,19 @@ int Scene::QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceOb
 
 void Scene::Update(float DeltaTime)
 {
-	printf("Entities: %i \n", m_Entities.size());
+	//printf("Entities: %i \n", m_Entities.size());
 
-	for (int i = (int)m_Entities.size() - 1; i >=0; i--)
+	for (auto it = m_Entities.begin(); it != m_Entities.end(); )
 	{
-		auto Entity = *m_Entities[i];
-
-		if (Entity.IsMarkedToDestroy())
+		if ((*it)->IsPendingDestroy())
 		{
-			//TODO: not called ever, investigate bug
-			Entity.UnInitialize();
-			m_Entities.erase(m_Entities.begin() + i);
+			(*it)->Destroy();
+			it = m_Entities.erase(it);
+			continue;
 		}
 
-		Entity.Update(DeltaTime);
+		(*it)->Update(DeltaTime);
+		++it;
 	}
 	
 	m_CleanDebugAccumulator += DeltaTime;
@@ -200,24 +202,30 @@ void Scene::Update(float DeltaTime)
 		m_CleanDebugAccumulator = 0;
 	}
 	
-	for (const auto ObjA : m_DynamicComponents)
+	for (const auto& ObjAPtr : m_DynamicComponents)
 	{
-		QueryDynamicCollisions(ObjA->GetRectTransform(), ObjA, false);
-		QueryStaticCollisions(ObjA->GetRectTransform(), ObjA, false);
+		if (auto Obj = ObjAPtr.lock())
+		{
+			QueryDynamicCollisions(Obj->GetRectTransform(), Obj, false);
+			QueryStaticCollisions(Obj->GetRectTransform(), Obj, false);
+		}
 	}
 }
 
 void Scene::DrawDebugCollisions()
 {
-	for (auto element : m_DebugCollisions)
+	for (auto& ElementPtr : m_DebugCollisions)
 	{
-		auto rect_transform = element->GetRectTransform();
-		Uint8 prevR, prevG, prevB, prevA;
+		if (const auto Element = ElementPtr.lock())
+		{
+			auto rect_transform = Element->GetRectTransform();
+			Uint8 prevR, prevG, prevB, prevA;
 		
-		SDL_GetRenderDrawColor(Engine::Get()->GetRenderer(), &prevR, &prevG, &prevB, &prevA);
-		SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), 255, 00, 00, 255);
-		SDL_RenderFillRect(Engine::Get()->GetRenderer(), &rect_transform);
-		SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), prevR, prevG, prevB, prevA);
+			SDL_GetRenderDrawColor(Engine::Get()->GetRenderer(), &prevR, &prevG, &prevB, &prevA);
+			SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), 255, 00, 00, 255);
+			SDL_RenderFillRect(Engine::Get()->GetRenderer(), &rect_transform);
+			SDL_SetRenderDrawColor(Engine::Get()->GetRenderer(), prevR, prevG, prevB, prevA);
+		}
 	}
 }
 
@@ -241,36 +249,36 @@ void Scene::UnInitialize()
 	m_Entities.clear();
 }
 
-void Scene::AddEntity(Entity* Entity)
+void Scene::AddEntity(std::unique_ptr<Entity> Entity)
 {
-	m_Entities.push_back(std::make_unique<::Entity>(*Entity));
+	m_Entities.push_back(std::move(Entity));
 }
 
 void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity)
 {
 	ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-	Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile");
+	std::unique_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile");
 
-	if (PhysicsComponent* Physics = NewEntity->GetComponent<PhysicsComponent>())
+	if (auto Physics = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
 	{
 		InitPhysics(Physics, Position.X, Position.Y);
 		m_DynamicComponents.push_back(Physics); //todo: merge to single place
 		printf("Inited projectile at pos %i %i", Position.X, Position.Y);
 	}
 
-	if (ProjectileMovementComponent* Projectile = NewEntity->GetComponent<ProjectileMovementComponent>())
+	if (const auto Projectile = NewEntity->GetComponentWeak<ProjectileMovementComponent>().lock())
 	{
 		Projectile->SetVelocity(Velocity);
 	}
 
-	AddEntity(NewEntity);
-
 	NewEntity->Initialize();
-
+	
+	AddEntity(std::move(NewEntity));
+	
 	printf("Added projectile");
 }
 
-void Scene::InitPhysics(PhysicsComponent* Physics, int PositionX, int PositionY)
+void Scene::InitPhysics(std::shared_ptr<PhysicsComponent> Physics, int PositionX, int PositionY)
 {
 	const SDL_Rect Rect = Physics->GetRectTransform();
 	Physics->SetPosition(PositionX, PositionY);
@@ -308,13 +316,16 @@ void Scene::LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend)
 			{
 				const char Key[] = { Character, '\0' };
 				nlohmann::json EntitySpecs = Legend[Key];
-	
-				Entity* NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
-				PhysicsComponent* PhysicsComponentPtr = NewEntity->GetComponent<PhysicsComponent>();
-				const SDL_Rect Rect = PhysicsComponentPtr->GetRectTransform();
+				std::unique_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
 				
-				InitPhysics(PhysicsComponentPtr, Column * Rect.w, Row * Rect.h);
-				AddEntity(NewEntity);
+				if (auto PhysicsComponentPtr = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
+				{
+					const SDL_Rect Rect = PhysicsComponentPtr->GetRectTransform();
+				
+					InitPhysics(PhysicsComponentPtr, Column * Rect.w, Row * Rect.h);
+					AddEntity(std::move(NewEntity));
+				}
+			
 			}
 			++Column;
 		}

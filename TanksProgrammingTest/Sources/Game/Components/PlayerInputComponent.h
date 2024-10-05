@@ -10,12 +10,12 @@ class PlayerInputComponent : public EntityComponent
 public:
 	PlayerInputComponent(Entity* Owner);
 	PlayerInputComponent();
-
-	virtual EntityComponent* Clone() const override { return new PlayerInputComponent(*this); }
+	
+	std::unique_ptr<EntityComponent> Clone() const override { return std::make_unique<PlayerInputComponent>(*this); }
 
 	virtual void Initialize() override;
 	virtual void Update(float DeltaTime) override;
 
 private:
-	PhysicsComponent* m_PhysicsComponent;
+	std::weak_ptr<PhysicsComponent> m_PhysicsComponent;
 };

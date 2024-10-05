@@ -33,7 +33,7 @@ public:
 	void SetActiveScene(Scene* Scene) { m_ActiveScene = Scene; }
 	void CreateActiveSceneFromTemplate(std::string Name);
 
-	int QueryCollisions(SDL_Rect SourceRect, PhysicsComponent* const SourceObj) const;
+	int QueryCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const SourceObj) const;
 	void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const;
 
 private:

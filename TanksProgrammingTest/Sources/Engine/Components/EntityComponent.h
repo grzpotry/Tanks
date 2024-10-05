@@ -10,10 +10,14 @@ class Entity;
 class EntityComponent
 {
 public:
+	virtual ~EntityComponent()
+	{
+		//printf("Destroy component");
+	}
 	EntityComponent() = delete;
 	EntityComponent(Entity* Owner);
 	
-	virtual EntityComponent* Clone() const = 0;
+	virtual std::unique_ptr<EntityComponent> Clone() const = 0;
 
 	virtual void LoadFromConfig(nlohmann::json Config);
 	virtual void Initialize();
@@ -27,7 +31,7 @@ public:
 
 
 protected:
-	~EntityComponent() = default;
+	//~EntityComponent() = default;
 
 private:
 
