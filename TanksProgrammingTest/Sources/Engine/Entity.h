@@ -3,42 +3,45 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
-class EntityComponent;
-
-class Entity
+namespace Engine
 {
-public:
-	
-	void LoadFromConfig(nlohmann::json Config);
-	void Initialize();
-	void Update(float DeltaTime);
-	void Draw();
-	void UnInitialize();
-	void MarkDestroy();
-	void Destroy();
+    using namespace std;
 
-	void AddComponent(std::unique_ptr<EntityComponent> Component);
-	void RemoveComponent(EntityComponent* Component);
+    class EntityComponent;
 
-	template <typename ComponentType>
-	std::weak_ptr<ComponentType> GetComponentWeak()
-	{
-		for (auto& Component : m_Components)
-		{
-			if (auto TypedComponent = std::dynamic_pointer_cast<ComponentType>(Component))
-			{
-				return TypedComponent;
-			}
-		}
-		return std::weak_ptr<ComponentType>();
-	}
+    class Entity
+    {
+    public:
+        void LoadFromConfig(nlohmann::json Config);
+        void Initialize();
+        void Update(float DeltaTime);
+        void Draw();
+        void UnInitialize();
+        void MarkDestroy();
+        void Destroy();
 
-	std::string GetName() {return m_Name;}
+        void AddComponent(unique_ptr<EntityComponent> Component);
+        void RemoveComponent(EntityComponent* Component);
 
-	bool IsPendingDestroy() {return bPendingDestroy;}
-	
-private:
-	std::list<std::shared_ptr<EntityComponent>> m_Components;
-	std::string m_Name;
-	bool bPendingDestroy = false;
-};
+        string GetName() { return m_Name; }
+        bool IsPendingDestroy() const { return bPendingDestroy; }
+
+        template <typename ComponentType>
+        weak_ptr<ComponentType> GetComponentWeak()
+        {
+            for (auto& Component : m_Components)
+            {
+                if (auto TypedComponent = dynamic_pointer_cast<ComponentType>(Component))
+                {
+                    return TypedComponent;
+                }
+            }
+            return weak_ptr<ComponentType>();
+        }
+
+    private:
+        list<shared_ptr<EntityComponent>> m_Components;
+        string m_Name;
+        bool bPendingDestroy = false;
+    };
+}

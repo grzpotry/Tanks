@@ -3,118 +3,165 @@
 #include "Engine.h"
 #include "Components/PhysicsComponent.h"
 
-PlayerInputComponent::PlayerInputComponent(Entity* Owner)
-    : EntityComponent(Owner)
+namespace Game
 {
-}
-
-PlayerInputComponent::PlayerInputComponent()
-    : PlayerInputComponent(nullptr)
-{
-}
-
-void PlayerInputComponent::Initialize()
-{
-    m_PhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
-}
-
-void PlayerInputComponent::Update(float DeltaTime)
-{
-    constexpr int Speed = 400;
-    const int MoveDistance = Speed * DeltaTime;
-
-    if (MoveDistance == 0)
+    using namespace Engine;
+    using Engine = ::Engine::Engine;
+    
+    PlayerInputComponent::PlayerInputComponent(Entity* Owner)
+        : EntityComponent(Owner)
     {
-        printf("Can't move player, very small delta time [%f].  ", DeltaTime);
     }
 
-    if (const auto PhysicsComponent = m_PhysicsComponent.lock())
+    PlayerInputComponent::PlayerInputComponent()
+        : PlayerInputComponent(nullptr)
     {
-        SDL_Rect Rectangle = PhysicsComponent->GetRectTransform();
-        std::vector<SDL_Event> Events = Engine::Get()->GetEvents();
-        const Uint8* Keystates = SDL_GetKeyboardState(NULL);
+    }
 
-        //TODO: add some input handling layer
-        if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A])
-        {
-            Rectangle.x -= MoveDistance;
-            PhysicsComponent->SetRotationAngle(-90);
-        }
-        else if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D])
-        {
-            Rectangle.x += MoveDistance;
-            PhysicsComponent->SetRotationAngle(90);
-        }
-        else if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP])
-        {
-            Rectangle.y -= MoveDistance;
-            PhysicsComponent->SetRotationAngle(0);
-        }
-        else if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN])
-        {
-            Rectangle.y += MoveDistance;
-            PhysicsComponent->SetRotationAngle(180);
-        }
+    void PlayerInputComponent::Initialize()
+    {
+        m_WeakPhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
+    }
 
-        const int Collisions = Engine::Get()->QueryCollisions(Rectangle, PhysicsComponent); //avoid get
-        if (Collisions > 0)
-        {
-            //can't move player
-        }
-        else
-        {
-            const auto PlayerRect = &PhysicsComponent->GetRectTransform();
-            PlayerRect->x = Rectangle.x;
-            PlayerRect->y = Rectangle.y;
-        }
+    bool TryFindBetterPosition(SDL_Rect SourceRect, const shared_ptr<PhysicsComponent>& SourceObj, SDL_Rect& FixedRect, bool AdjustX)
+    {
+        const int MaxFix = (AdjustX ? SourceRect.h : SourceRect.w) / 2;
 
-        for (const SDL_Event& Event : Events)
+        for (int i = 0; i < MaxFix; i++)
         {
-            switch (Event.type)
+            for (int dir = -1; dir <= 1; dir += 2)
             {
-            case SDL_KEYDOWN:
+                SDL_Rect Potential = SourceRect;
+                
+                if (AdjustX)
                 {
-                    switch (Event.key.keysym.scancode)
-                    {
-                    case SDL_SCANCODE_SPACE:
-                        {
-                            constexpr int ProjectileSpeed = 400;
-                            const auto velocity = PhysicsComponent->GetForward();
-                            Vector2D<int> VelocityInt(velocity.X, velocity.Y);
-                            Engine::Get()->AddProjectile(Vector2D(Rectangle.x + (Rectangle.w - 5) / 2, Rectangle.y),
-                                                         VelocityInt * ProjectileSpeed);
-                        }
-                        break;
-                    default:
-                        break;
-                    }
+                    Potential.x += dir * i;
+                }
+                else
+                {
+                    Potential.y += dir * i;
+                }
+                
+                if (Engine::Get()->QueryCollisions(Potential, SourceObj) == 0)
+                {
+                    printf("Adjusted rect position by %i \n", i);
+                    FixedRect = Potential;
+                    return true;
                 }
             }
         }
 
+        return false;
+    }
 
-        int MaxWidth = 0, MaxHeight = 0;
-        SDL_GetWindowSize(Engine::Get()->GetWindow(), &MaxWidth, &MaxHeight);
+    void PlayerInputComponent::Update(float DeltaTime)
+    {
+        constexpr int Speed = 400;
+        const int MoveDistance = Speed * DeltaTime;
 
-        //restrict movement
-        if (Rectangle.x + Rectangle.w > MaxWidth)
+        if (MoveDistance == 0)
         {
-            Rectangle.x = MaxWidth - Rectangle.w;
+            printf("Can't move player, very small delta time [%f].  ", DeltaTime);
         }
 
-        if (Rectangle.x < 0)
+        if (const auto PhysicsComponent = m_WeakPhysicsComponent.lock())
         {
-            Rectangle.x = 0;
-        }
+            SDL_Rect Rectangle = PhysicsComponent->GetRectTransform();
+            const vector<SDL_Event> Events = Engine::Get()->GetEvents();
+            const Uint8* Keystates = SDL_GetKeyboardState(NULL);
 
-        if (Rectangle.y + Rectangle.h > MaxHeight)
-        {
-            Rectangle.y = MaxHeight - Rectangle.h;
-        }
+            //TODO: add some input handling layer
+            if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A])
+            {
+                Rectangle.x -= MoveDistance;
+                PhysicsComponent->SetRotationAngle(-90);
+            }
+            else if (Keystates[SDL_SCANCODE_RIGHT] || Keystates[SDL_SCANCODE_D])
+            {
+                Rectangle.x += MoveDistance;
+                PhysicsComponent->SetRotationAngle(90);
+            }
+            else if (Keystates[SDL_SCANCODE_W] || Keystates[SDL_SCANCODE_UP])
+            {
+                Rectangle.y -= MoveDistance;
+                PhysicsComponent->SetRotationAngle(0);
+            }
+            else if (Keystates[SDL_SCANCODE_S] || Keystates[SDL_SCANCODE_DOWN])
+            {
+                Rectangle.y += MoveDistance;
+                PhysicsComponent->SetRotationAngle(180);
+            }
 
-        if (Rectangle.y < 0)
-        {
-            Rectangle.y = 0;
+            const int Collisions = Engine::Get()->QueryCollisions(Rectangle, PhysicsComponent);
+            const auto PlayerRect = &PhysicsComponent->GetRectTransform();
+            
+            if (Collisions > 0)
+            {
+                SDL_Rect OutAdjustedRect;
+                const int Angle = PhysicsComponent->GetRotationAngle();
+                const bool AdjustX = Angle == 0 || Angle == 180;
+
+                if (TryFindBetterPosition(Rectangle, PhysicsComponent, OutAdjustedRect, AdjustX))
+                {
+                    PlayerRect->x = OutAdjustedRect.x;
+                    PlayerRect->y = OutAdjustedRect.y;
+                }
+            }
+            else
+            {
+                PlayerRect->x = Rectangle.x;
+                PlayerRect->y = Rectangle.y;
+            }
+
+            for (const SDL_Event& Event : Events)
+            {
+                switch (Event.type)
+                {
+                case SDL_KEYDOWN:
+                    {
+                        switch (Event.key.keysym.scancode)
+                        {
+                        case SDL_SCANCODE_SPACE:
+                            {
+                                constexpr int ProjectileSpeed = 400;
+                                const auto Velocity = PhysicsComponent->GetForward() * ProjectileSpeed;
+                            
+                                const Vector2D<int> StartOffset = Vector2D(10, 10) + PhysicsComponent->GetForward() * 10;
+                                Engine::Get()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity);
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            int MaxWidth = 0, MaxHeight = 0;
+            SDL_GetWindowSize(Engine::Get()->GetWindow(), &MaxWidth, &MaxHeight);
+
+            //restrict movement
+            if (Rectangle.x + Rectangle.w > MaxWidth)
+            {
+                Rectangle.x = MaxWidth - Rectangle.w;
+            }
+
+            if (Rectangle.x < 0)
+            {
+                Rectangle.x = 0;
+            }
+
+            if (Rectangle.y + Rectangle.h > MaxHeight)
+            {
+                Rectangle.y = MaxHeight - Rectangle.h;
+            }
+
+            if (Rectangle.y < 0)
+            {
+                Rectangle.y = 0;
+            }
         }
     }
+    
 }

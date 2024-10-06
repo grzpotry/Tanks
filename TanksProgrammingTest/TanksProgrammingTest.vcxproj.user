@@ -13,8 +13,8 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerEnvironment>PATH=%PATH%;$(ProjectDir)\External\SDL2-2.0.14\lib\x64
-;$(ProjectDir)\External\SDL2_image-2.0.5\lib\x64;G:\unreal_projects\Tanks\TanksProgrammingTest\External\SDL2_ttf-2.22.0\lib\x64</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>PATH=$(ProjectDir)\External\SDL2_ttf-2.22.0\lib\x64;$(ProjectDir)\External\SDL2_image-2.0.5\lib\x64;$(ProjectDir)\External\SDL2-2.0.14\lib\x64
+;%PATH%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -2,20 +2,22 @@
 
 #include "Components/EntityComponent.h"
 
-class PhysicsComponent;
-
-class PlayerInputComponent : public EntityComponent
+namespace Game
 {
+    using namespace std;
 
-public:
-	PlayerInputComponent(Entity* Owner);
-	PlayerInputComponent();
-	
-	std::unique_ptr<EntityComponent> Clone() const override { return std::make_unique<PlayerInputComponent>(*this); }
+    class PlayerInputComponent : public Engine::EntityComponent
+    {
+    public:
+        PlayerInputComponent(Engine::Entity* Owner);
+        PlayerInputComponent();
 
-	virtual void Initialize() override;
-	virtual void Update(float DeltaTime) override;
+        [[nodiscard]] unique_ptr<EntityComponent> Clone() const override { return make_unique<PlayerInputComponent>(*this); }
 
-private:
-	std::weak_ptr<PhysicsComponent> m_PhysicsComponent;
-};
+        void Initialize() override;
+        void Update(float DeltaTime) override;
+
+    private:
+        weak_ptr<Engine::PhysicsComponent> m_WeakPhysicsComponent;
+    };
+}

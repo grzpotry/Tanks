@@ -12,7 +12,7 @@
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
 			"Width": 30,
-			"Height": 30,
+			"Height": 35,
 			"PositionX": 300,
 			"PositionY": 480
 		}

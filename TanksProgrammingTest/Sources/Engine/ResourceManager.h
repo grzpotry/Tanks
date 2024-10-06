@@ -2,36 +2,47 @@
 
 #include <string>
 #include <map>
+#include <memory>
+#include <SDL_render.h>
 #include <nlohmann/json.hpp>
 
-enum class ResourceType : unsigned int
+namespace Engine
 {
-	Entity,
-	Scene
-};
+    using namespace std;
 
-class Entity;
-class EntityComponent;
+    enum class ResourceType : unsigned int
+    {
+        Entity,
+        Scene
+    };
 
-class ResourceManager
-{
+    class Entity;
+    class EntityComponent;
 
-public:
-	ResourceManager() = delete;
-	ResourceManager(std::string Path);
+    class ResourceManager
+    {
+    public:
+        ResourceManager() = delete;
+        ResourceManager(string Path);
 
-	void LoadResources();
-	const nlohmann::json& GetJsonConfig(std::string Name, enum ResourceType Type);
-	void RegisterComponent(std::string Type, EntityComponent* Component);
-	const EntityComponent* GetComponentPrototypeByName(std::string Name);
-	std::unique_ptr<Entity> CreateEntityFromDataTemplate(std::string Name);
+        void LoadResources();
+        const nlohmann::json& GetJsonConfig(string Name, enum ResourceType Type);
+        void RegisterComponent(string Type, EntityComponent* Component);
+        const EntityComponent* GetComponentPrototypeByName(string Name);
+        unique_ptr<Entity> CreateEntityFromDataTemplate(string Name);
+        std::shared_ptr<SDL_Texture> GetOrLoadTexture(string Path);
+        void ReleaseTexture(string Path);
+        
+    private:
+        void LoadResourcesFromFolder(string Folder, map<string, nlohmann::json>& MapContainer) const;
+        static std::shared_ptr<SDL_Texture> LoadTexture(string Path);
+      
 
-private:
-	void LoadResourcesFromFolder(std::string Folder, std::map<std::string, nlohmann::json>& MapContainer);
-	
-	std::string m_Path;
-	std::map<std::string, nlohmann::json> m_Entities;
-	std::map<std::string, nlohmann::json> m_Scenes;
 
-	std::map<std::string, EntityComponent*> m_ComponentsPrototypes;
-};
+        string m_Path;
+        map<string, nlohmann::json> m_Entities;
+        map<string, nlohmann::json> m_Scenes;
+        map<string, EntityComponent*> m_ComponentsPrototypes;
+        map<string, shared_ptr<SDL_Texture>> m_Textures;
+    };
+}

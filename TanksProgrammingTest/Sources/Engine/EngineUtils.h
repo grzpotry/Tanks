@@ -5,7 +5,18 @@
 
 namespace EngineUtils
 {
-	std::string WstringToString(std::wstring WstringToConvert)
+#define check(condition, errorMessage)                             \
+    do {                                                           \
+        if (!(condition)) {                                        \
+            std::cerr << "Assertion failed: " << (errorMessage)    \
+                      << "\nCondition: " << #condition             \
+                      << "\nFile: " << __FILE__                    \
+                      << "\nLine: " << __LINE__ << std::endl;      \
+            assert(condition);                                     \
+        }                                                          \
+    } while (false)
+
+	inline std::string WstringToString(std::wstring WstringToConvert)
 	{
 		if (!WstringToConvert.empty())
 		{
@@ -19,7 +30,7 @@ namespace EngineUtils
 		return std::string();
 	}
 
-	std::wstring StringToWstring(std::string StringToConvert)
+	inline std::wstring StringToWstring(std::string StringToConvert)
 	{
 		if (!StringToConvert.empty())
 		{

@@ -1,26 +1,29 @@
 #include "EntityComponent.h"
 
-EntityComponent::EntityComponent(Entity* Owner)
-	: m_Owner(Owner)
+namespace Engine
 {
-}
+    EntityComponent::EntityComponent(Entity* Owner)
+        : m_Owner(Owner)
+    {
+    }
 
-void EntityComponent::LoadFromConfig(nlohmann::json Config)
-{
-}
+    void EntityComponent::LoadFromConfig(nlohmann::json Config)
+    {
+    }
 
-void EntityComponent::Initialize()
-{
-}
+    void EntityComponent::Initialize()
+    {
+    }
 
-void EntityComponent::Update(float DeltaTime)
-{
-}
+    void EntityComponent::Update(float DeltaTime)
+    {
+    }
 
-void EntityComponent::Draw()
-{
-}
+    void EntityComponent::Draw()
+    {
+    }
 
-void EntityComponent::UnInitialize()
-{
+    void EntityComponent::UnInitialize()
+    {
+    }
 }

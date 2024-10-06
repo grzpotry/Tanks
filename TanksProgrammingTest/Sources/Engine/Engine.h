@@ -6,46 +6,55 @@
 #include <SDL_ttf.h>
 #include <vector>
 #include <string>
-
 #include "Entity.h"
 #include "Vector2D.h"
 
-class PhysicsComponent;
-class Scene;
-class ResourceManager;
+#define DEBUG_COLLISIONS true
 
-class Engine
+namespace Engine
 {
+    using namespace std;
 
-public:
-	static Engine* Get();
+    class PhysicsComponent;
+    class Scene;
+    class ResourceManager;
 
-	void Initialize();
-	void Update(float DeltaTime);
-	void MainLoop();
-	void Draw();
-	void ShutDown();
+    class Engine
+    {
+    public:
+        static Engine* Get();
 
-	SDL_Renderer* GetRenderer() { return m_Renderer; }
-	SDL_Window* GetWindow() { return m_Window; }
-	ResourceManager* GetResourceManager() { return m_ResourceManager; }
-	const std::vector<SDL_Event>& GetEvents() { return m_Events; }
-	void SetActiveScene(Scene* Scene) { m_ActiveScene = Scene; }
-	void CreateActiveSceneFromTemplate(std::string Name);
+        void Initialize();
+        void Update(float DeltaTime);
+        void MainLoop();
+        void Draw();
+        void ShutDown();
 
-	int QueryCollisions(SDL_Rect SourceRect, std::shared_ptr<PhysicsComponent> const SourceObj) const;
-	void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const;
+        Vector2D<int> GetWindowSize() const { return Vector2D(m_WindowWidth, m_WindowHeight);}
+        SDL_Renderer* GetRenderer() const { return m_Renderer; }
+        SDL_Window* GetWindow() const { return m_Window; }
+        ResourceManager* GetResourceManager() const { return m_ResourceManager; }
+        const vector<SDL_Event>& GetEvents() { return m_Events; }
+        void SetActiveScene(Scene* Scene) { m_ActiveScene = Scene; }
+        void CreateActiveSceneFromTemplate(string Name);
 
-private:
-	Engine();
+        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj) const;
+        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const;
 
-	SDL_Window* m_Window;
-	SDL_Renderer* m_Renderer;
-	Scene* m_ActiveScene;
-	ResourceManager* m_ResourceManager;
-	
-	unsigned int FramesPerSecond;
-	float TimePerFrameInSeconds;
+    private:
+        Engine();
 
-	std::vector<SDL_Event> m_Events;
-};
+        SDL_Window* m_Window;
+        SDL_Renderer* m_Renderer;
+        Scene* m_ActiveScene;
+        ResourceManager* m_ResourceManager;
+
+        int m_WindowWidth;
+        int m_WindowHeight;
+
+        unsigned int FramesPerSecond;
+        float TimePerFrameInSeconds;
+
+        vector<SDL_Event> m_Events;
+    };
+}

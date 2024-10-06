@@ -4,20 +4,23 @@
 #include "Components/PlayerInputComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 
+using namespace Engine;
+using EngineClass = ::Engine::Engine;
+using namespace Game;
+
 int main(int argc, char* argv[])
 {
-	Engine::Get()->Initialize();
+    EngineClass::Get()->Initialize();
 
-	ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-	ResourceManagerPtr->RegisterComponent("PlayerInputComponent", new PlayerInputComponent());
-	ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureComponent());
-	ResourceManagerPtr->RegisterComponent("PhysicsComponent", new PhysicsComponent());
-	ResourceManagerPtr->RegisterComponent("ProjectileMovementComponent", new ProjectileMovementComponent());
+    ResourceManager* ResourceManagerPtr = EngineClass::Get()->GetResourceManager();
+    ResourceManagerPtr->RegisterComponent("PlayerInputComponent", new PlayerInputComponent());
+    ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureComponent());
+    ResourceManagerPtr->RegisterComponent("PhysicsComponent", new PhysicsComponent());
+    ResourceManagerPtr->RegisterComponent("ProjectileMovementComponent", new ProjectileMovementComponent());
 
-	Engine::Get()->CreateActiveSceneFromTemplate("MainScene");
+    EngineClass::Get()->CreateActiveSceneFromTemplate("MainScene");
+    EngineClass::Get()->MainLoop();
+    EngineClass::Get()->ShutDown();
 
-	Engine::Get()->MainLoop();
-	Engine::Get()->ShutDown();
-
-	return 0;
+    return 0;
 }
