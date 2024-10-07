@@ -56,6 +56,8 @@ namespace Engine
         void AddEntity(shared_ptr<Entity> Entity);
         void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent);
 
+        bool TryFindBetterMovePosition(SDL_Rect SourceRect, const shared_ptr<PhysicsComponent>& SourceObj, SDL_Rect& FixedRect, bool AdjustX);
+
     private:
         int QueryStaticCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);
         int QueryDynamicCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);

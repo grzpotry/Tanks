@@ -27,11 +27,11 @@ namespace Engine
         }
     }
 
-    void Entity::Initialize()
+    void Entity::Initialize(Scene* const Scene) const
     {
         for (const auto& Component : m_Components)
         {
-            Component->Initialize();
+            Component->Initialize(Scene);
         }
     }
 

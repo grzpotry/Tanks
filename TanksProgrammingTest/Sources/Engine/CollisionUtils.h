@@ -18,16 +18,18 @@ namespace Engine
         Projectile = 1 << 1,
         Wall = 1 << 2,
         Player = 1 << 3,
+        Enemy = 1 << 4,
         All = (1 << 8) - 1
     };
 
     const std::unordered_map<string, CollisionLayer> LayerNameToEnum =
      {
         {"None", CollisionLayer::None},
-        {"Wall", CollisionLayer::Wall},
         {"StoneWall", CollisionLayer::StoneWall},
         {"Projectile", CollisionLayer::Projectile},
+        {"Wall", CollisionLayer::Wall},
         {"Player", CollisionLayer::Player},
+        {"Enemy", CollisionLayer::Enemy},
         {"All", CollisionLayer::All}
      };
 
@@ -52,7 +54,7 @@ namespace Engine
                     else
                     {
                         string ErrorStr = "Unknown layer name \"" + LayerName;
-                        check(bIsLayerFound, ErrorStr.c_str());
+                        checkMsg(bIsLayerFound, ErrorStr.c_str());
                     }
                 }
                 return ResultMask;

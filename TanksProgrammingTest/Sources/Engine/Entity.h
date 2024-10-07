@@ -4,6 +4,7 @@
 
 namespace Engine
 {
+    class Scene;
     using namespace std;
 
     class EntityComponent;
@@ -17,7 +18,7 @@ namespace Engine
         }
 
         void LoadFromConfig(nlohmann::json Config);
-        void Initialize();
+        void Initialize(Scene* Scene) const;
         void Update(float DeltaTime);
         void Draw();
         void UnInitialize();
@@ -31,7 +32,7 @@ namespace Engine
         string GetName() { return m_Name; }
         bool IsPendingDestroy() const { return bPendingDestroy; }
         weak_ptr<Entity> GetParent() const { return m_Parent; }
-        bool IsChildOf(Entity* const Other) const;
+        bool IsChildOf(Entity* Other) const;
 
         template <typename ComponentType>
         weak_ptr<ComponentType> GetComponentWeak()

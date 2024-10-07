@@ -229,7 +229,7 @@ namespace Engine
 	{
 		for (const auto& Entity : m_Entities)
 		{
-			Entity->Initialize();
+			Entity->Initialize(this);
 		}
 		
 		bIsInitialized = true;
@@ -255,7 +255,7 @@ namespace Engine
 		
 		if (bIsInitialized)
 		{
-			Entity->Initialize();
+			Entity->Initialize(this);
 		}
 		
 		AddEntity(std::move(Entity));
@@ -280,6 +280,37 @@ namespace Engine
 		AddEntity(std::move(NewEntity), Position);
 	}
 
+	bool Scene::TryFindBetterMovePosition(SDL_Rect SourceRect, const shared_ptr<PhysicsComponent>& SourceObj,
+		SDL_Rect& FixedRect, bool AdjustX)
+	{
+		const int MaxFix = (AdjustX ? SourceRect.h : SourceRect.w) / 2;
+
+		for (int i = 0; i < MaxFix; i++)
+		{
+			for (int dir = -1; dir <= 1; dir += 2)
+			{
+				SDL_Rect Potential = SourceRect;
+                
+				if (AdjustX)
+				{
+					Potential.x += dir * i;
+				}
+				else
+				{
+					Potential.y += dir * i;
+				}
+                
+				if (QueryCollisions(Potential, SourceObj) == 0)
+				{
+					printf("Adjusted rect position by %i \n", i);
+					FixedRect = Potential;
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 	void Scene::SetPhysics(const shared_ptr<PhysicsComponent>& Physics, const Vector2D<int> Position)
 	{
 		Physics->SetPosition(Position.X, Position.Y);
@@ -326,7 +357,6 @@ namespace Engine
 
 		int Capacity = m_StaticTilesRows * MaxCols;
 		m_StaticTiles.resize(Capacity);
-		printf("Reserved %i", Capacity);
 	
 		for (auto Item : Content.items())
 		{

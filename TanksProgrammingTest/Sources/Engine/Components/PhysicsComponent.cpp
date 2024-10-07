@@ -55,10 +55,9 @@ namespace Engine
 
     void PhysicsComponent::SetRotationAngle(int EulerDeg)
     {
-        check(EulerDeg % 90 == 0, "Unexpected rotation, only 4 basic directions are supported");
+        checkMsg(EulerDeg % 90 == 0, "Unexpected rotation, only 4 basic directions are supported");
     
         m_RotationAngle = EulerDeg;
-
 
         constexpr float PI = 3.14159265f;
         const float AngleRad = EulerDeg * (PI / 180.0f);

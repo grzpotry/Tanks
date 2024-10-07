@@ -44,6 +44,14 @@ namespace Engine
         {
             return Vector2D(X / scalar, Y / scalar);
         }
+        
+        bool operator==(const Vector2D& other) const {
+            return X == other.X && Y == other.Y;
+        }
+        
+        bool operator!=(const Vector2D& other) const {
+            return !(*this == other);
+        }
 
         T magnitude() const
         {

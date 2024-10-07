@@ -11,8 +11,9 @@ namespace Engine
     {
     }
 
-    void EntityComponent::Initialize()
+    void EntityComponent::Initialize(Scene* const Scene)
     {
+        m_Scene = Scene;
     }
 
     void EntityComponent::Update(float DeltaTime)

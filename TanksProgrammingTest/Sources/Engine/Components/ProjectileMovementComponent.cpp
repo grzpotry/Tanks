@@ -4,8 +4,9 @@
 
 namespace Engine
 {
-    void ProjectileMovementComponent::Initialize()
+    void ProjectileMovementComponent::Initialize(Scene* const Scene)
     {
+        EntityComponent::Initialize(Scene);
         m_WeakPhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
     }
 

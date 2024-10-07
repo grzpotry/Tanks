@@ -319,6 +319,7 @@
     <ClCompile Include="Sources\Engine\Entity.cpp" />
     <ClCompile Include="Sources\Engine\ResourceManager.cpp" />
     <ClCompile Include="Sources\Engine\Scene.cpp" />
+    <ClCompile Include="Sources\Game\Components\EnemyControllerComponent.cpp" />
     <ClCompile Include="Sources\Game\Components\PlayerInputComponent.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -393,6 +394,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Sources\Game\Components\TankComponent.cpp" />
     <ClCompile Include="Sources\Game\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -407,7 +409,9 @@
     <ClInclude Include="Sources\Engine\Scene.h" />
     <ClInclude Include="Sources\Engine\EngineUtils.h" />
     <ClInclude Include="Sources\Engine\Vector2D.h" />
+    <ClInclude Include="Sources\Game\Components\EnemyControllerComponent.h" />
     <ClInclude Include="Sources\Game\Components\PlayerInputComponent.h" />
+    <ClInclude Include="Sources\Game\Components\TankComponent.h" />
     <ClInclude Include="Sources\Game\Config.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

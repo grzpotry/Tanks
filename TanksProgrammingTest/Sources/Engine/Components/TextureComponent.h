@@ -70,7 +70,7 @@ namespace Engine
 
 		[[nodiscard]] unique_ptr<EntityComponent> Clone() const override { return make_unique<TextureComponent>(*this); }
 		void LoadFromConfig(nlohmann::json Config) override;
-		void Initialize() override;
+		void Initialize(Scene* const Scene) override;
 		void UnInitialize() override;
 		void Draw() override;
 		void SetTextureFromAssetName(string Name);

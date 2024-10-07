@@ -41,6 +41,8 @@ namespace Engine
 		m_ResourceManager = new ResourceManager("Resources");
 		m_ResourceManager->LoadResources();
 
+		m_RandomGenerator = make_shared<std::mt19937>(RandomDevice());
+
 		SDL_GetWindowSize(Engine::Get()->GetWindow(), &m_WindowWidth, &m_WindowHeight);
 
 		TTF_Init();
@@ -141,6 +143,7 @@ namespace Engine
 			m_ActiveScene->UnInitialize();
 		}
 
+		m_RandomGenerator = nullptr;
 		TTF_Quit();
 		SDL_DestroyRenderer(m_Renderer);
 		SDL_DestroyWindow(m_Window);
@@ -157,19 +160,6 @@ namespace Engine
 			SceneFromTemplate->Initialize();
 
 			m_ActiveScene = SceneFromTemplate;
-		}
-	}
-
-	int Engine::QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj) const
-	{
-		return m_ActiveScene->QueryCollisions(SourceRect, SourceObj);
-	}
-
-	void Engine::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent) const
-	{
-		if (m_ActiveScene)
-		{
-			m_ActiveScene->AddProjectile(Position, Velocity, Parent);
 		}
 	}
 }

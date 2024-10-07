@@ -28,8 +28,9 @@ namespace Engine
 		}
 	}
 
-	void TextureComponent::Initialize()
+	void TextureComponent::Initialize(Scene* const Scene)
 	{
+		EntityComponent::Initialize(Scene);
 		m_PhysicsComponentWeak = GetOwner()->GetComponentWeak<PhysicsComponent>();
 		m_TexturePtr = Engine::Get()->GetResourceManager()->GetOrLoadTexture(m_TexturePath);
 	}

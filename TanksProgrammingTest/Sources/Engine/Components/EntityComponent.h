@@ -3,6 +3,7 @@
 
 namespace Engine
 {
+    class Scene;
     class PhysicsComponent;
     class Entity;
     
@@ -24,7 +25,7 @@ namespace Engine
         virtual unique_ptr<EntityComponent> Clone() const = 0;
 
         virtual void LoadFromConfig(nlohmann::json Config);
-        virtual void Initialize();
+        virtual void Initialize(Scene* Scene);
         virtual void Update(float DeltaTime);
         virtual void Draw();
         virtual void UnInitialize();
@@ -35,6 +36,7 @@ namespace Engine
 
     protected:
         //~EntityComponent() = default;
+        Scene* m_Scene = nullptr;
 
     private:
         Entity* m_Owner;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_timer.h>
@@ -9,7 +10,7 @@
 #include "Entity.h"
 #include "Vector2D.h"
 
-#define DEBUG_COLLISIONS true
+#define DEBUG_COLLISIONS false
 
 namespace Engine
 {
@@ -35,12 +36,11 @@ namespace Engine
         SDL_Window* GetWindow() const { return m_Window; }
         ResourceManager* GetResourceManager() const { return m_ResourceManager; }
         const vector<SDL_Event>& GetEvents() { return m_Events; }
+        shared_ptr<std::mt19937> GetRandomGenerator() const {return m_RandomGenerator;}
+        
         void SetActiveScene(Scene* Scene) { m_ActiveScene = Scene; }
         void CreateActiveSceneFromTemplate(string Name);
-
-        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj) const;
-        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent) const;
-
+    
     private:
         Engine();
 
@@ -56,5 +56,8 @@ namespace Engine
         float TimePerFrameInSeconds;
 
         vector<SDL_Event> m_Events;
+        
+        std::random_device RandomDevice;
+        shared_ptr<std::mt19937>  m_RandomGenerator;
     };
 }

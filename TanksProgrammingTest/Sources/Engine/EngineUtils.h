@@ -5,7 +5,7 @@
 
 namespace EngineUtils
 {
-#define check(condition, errorMessage)                             \
+#define checkMsg(condition, errorMessage)                             \
     do {                                                           \
         if (!(condition)) {                                        \
             std::cerr << "Assertion failed: " << (errorMessage)    \

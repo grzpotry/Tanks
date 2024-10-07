@@ -1,24 +1,22 @@
 {
-	"Name": "Player",
+	"Name": "Enemy",
 	"Components": [
 		{
 			"Type": "TextureComponent",
-			"Texture": "BlueTank.png"
+			"Texture": "RedTank.png"
 		},
 		{
 			"Type": "TankComponent"
 		},
 		{
-			"Type": "PlayerInputComponent"
+			"Type": "EnemyControllerComponent"
 		},
 		{
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
 			"Width": 30,
 			"Height": 35,
-			"PositionX": 300,
-			"PositionY": 480,
-			"CollisionLayer": "Player",
+			"CollisionLayer": "Enemy",
 			"DestroyOnCollisionMask": "Projectile"
 		}
 	]

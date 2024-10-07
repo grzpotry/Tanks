@@ -6,6 +6,6 @@ namespace Game
     {
     public:
         static constexpr int ProjectileSpeed = 600;
-        static constexpr int PlayerSpeed = 400;
+        static constexpr int TankSpeed = 300;
     };
 }
