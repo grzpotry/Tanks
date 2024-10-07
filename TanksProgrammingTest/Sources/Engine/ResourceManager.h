@@ -23,19 +23,19 @@ namespace Engine
     {
     public:
         ResourceManager() = delete;
-        ResourceManager(string Path);
+        ResourceManager(const string& Path);
 
         void LoadResources();
-        const nlohmann::json& GetJsonConfig(string Name, enum ResourceType Type);
-        void RegisterComponent(string Type, EntityComponent* Component);
-        const EntityComponent* GetComponentPrototypeByName(string Name);
-        unique_ptr<Entity> CreateEntityFromDataTemplate(string Name);
-        std::shared_ptr<SDL_Texture> GetOrLoadTexture(string Path);
-        void ReleaseTexture(string Path);
+        const nlohmann::json& GetJsonConfig(const string& Name, enum ResourceType Type);
+        void RegisterComponent(const string& Type, EntityComponent* Component);
+        const EntityComponent* GetComponentPrototypeByName(const string& Name);
+        shared_ptr<Entity> CreateEntityFromDataTemplate(const string& Name, Entity* const Parent = nullptr);
+        std::shared_ptr<SDL_Texture> GetOrLoadTexture(const string& Path);
+        void ReleaseTexture(const string& Path);
         
     private:
-        void LoadResourcesFromFolder(string Folder, map<string, nlohmann::json>& MapContainer) const;
-        static std::shared_ptr<SDL_Texture> LoadTexture(string Path);
+        void LoadResourcesFromFolder(const string& Folder, map<string, nlohmann::json>& MapContainer) const;
+        static std::shared_ptr<SDL_Texture> LoadTexture(const string& Path);
       
 
 

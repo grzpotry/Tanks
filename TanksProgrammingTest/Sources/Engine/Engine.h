@@ -39,7 +39,7 @@ namespace Engine
         void CreateActiveSceneFromTemplate(string Name);
 
         int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj) const;
-        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const;
+        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent) const;
 
     private:
         Engine();

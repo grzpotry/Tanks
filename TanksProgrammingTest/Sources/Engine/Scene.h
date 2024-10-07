@@ -38,31 +38,34 @@ namespace Engine
         };
 
     public:
-        static void InitPhysics(shared_ptr<PhysicsComponent> Physics, int PositionX, int PositionY);
+        void SetPhysics(const shared_ptr<PhysicsComponent>& Physics, Vector2D<int> Position);
 
         void LoadFromConfig(nlohmann::json Config);
         int GetTileIndex(int Row, int Col) const;
         void Initialize();
         void UnInitialize();
-        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj);
+        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj);
+        void UpdateCollisions();
+        void UpdateDebugCollisions(float DeltaTime);
+        void UpdateEntities(float DeltaTime);
         void Update(float DeltaTime);
-        void Draw();
-        void DrawDebugCollisions();
+        void Draw() const;
+        void DrawDebugCollisions() const;
 
-        void AddEntity(unique_ptr<Entity> Entity);
-        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity);
+        void AddEntity(shared_ptr<Entity> Entity, Vector2D<int> Position);
+        void AddEntity(shared_ptr<Entity> Entity);
+        void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent);
 
     private:
-        int QueryStaticCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,
-                                  bool bSilent = false);
-        int QueryDynamicCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,
-                                   bool bSilent = false);
+        int QueryStaticCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);
+        int QueryDynamicCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);
         void LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend);
 
+        bool bIsInitialized = false;
         int m_StaticTilesRows = 0;
         float m_CleanDebugAccumulator = 0.0;
 
-        vector<unique_ptr<Entity>> m_Entities;
+        vector<shared_ptr<Entity>> m_Entities;
         vector<weak_ptr<PhysicsComponent>> m_StaticTiles; //TODO: cleanup expired tiles
         unordered_set<weak_ptr<PhysicsComponent>, WeakPtrHash, WeakPtrEqual> m_DebugCollisions;
         vector<weak_ptr<PhysicsComponent>> m_DynamicComponents;

@@ -6,10 +6,10 @@
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/PhysicsComponent.h"
 
+class ProjectileMovementComponent;
+
 namespace Engine
 {
-	class ProjectileMovementComponent;
-
 	void Scene::LoadFromConfig(nlohmann::json Config)
 	{
 		printf("LoadSceneFromConfig \n");
@@ -18,15 +18,17 @@ namespace Engine
 		if (Config.find("Entities") != Config.end())
 		{
 			ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-			for (auto Item : Config["Entities"].items())
+			
+			for (const auto& Item : Config["Entities"].items())
 			{
 				auto NewEntity = make_unique<Entity>();
 
 				nlohmann::json EntityConfig = Item.value();
 				string TypeName = EntityConfig.value("Type", "");
+				
 				if (!TypeName.empty())
 				{
-					nlohmann::json EntityTemplateConfig = ResourceManagerPtr->GetJsonConfig(TypeName, ResourceType::Entity);
+					const nlohmann::json EntityTemplateConfig = ResourceManagerPtr->GetJsonConfig(TypeName, ResourceType::Entity);
 					NewEntity->LoadFromConfig(EntityTemplateConfig);
 				}
 				else
@@ -34,7 +36,7 @@ namespace Engine
 					NewEntity->LoadFromConfig(Item.value());
 				}
 
-				AddEntity(move(NewEntity));
+				AddEntity(std::move(NewEntity));
 			}
 		}
 
@@ -47,41 +49,6 @@ namespace Engine
 	int Scene::GetTileIndex(const int Row, const int Col) const
 	{
 		return (Row * m_StaticTilesRows) + Col;
-	}
-
-	void Scene::Initialize()
-	{
-		for (const auto& Entity : m_Entities)
-		{
-			Entity->Initialize();
-		}
-
-		for (const auto& Entity : m_Entities)
-		{
-			if (auto Physics = Entity->GetComponentWeak<PhysicsComponent>().lock())
-			{
-				if (Physics->IsStatic())
-				{
-					auto Rect = Physics->GetRectTransform();
-					const int Row = Rect.x / Rect.w;
-					const int Col = Rect.y / Rect.h;
-					const int index = GetTileIndex(Row, Col);
-
-					if (index >= static_cast<int>(m_StaticTiles.size())) {
-						m_StaticTiles.resize(index + 1);
-					}
-
-					//assert (m_StaticTiles[index] == nullptr);
-
-					m_StaticTiles[index] = Physics;
-					//printf("Add tile %i %s size %i %i pos %i %i \n", index, Entity->GetName().c_str(), Rect.w, Rect.h, Rect.x, Rect.y);
-				}
-				else
-				{
-					m_DynamicComponents.push_back(Physics);
-				}
-			}
-		}
 	}
 
 	/*
@@ -169,7 +136,7 @@ namespace Engine
 	}
 
 
-	int Scene::QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const SourceObj)
+	int Scene::QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj)
 	{
 		int CollisionsCounter = 0;
 
@@ -179,30 +146,8 @@ namespace Engine
 		return CollisionsCounter;
 	}
 
-	void Scene::Update(float DeltaTime)
+	void Scene::UpdateCollisions()
 	{
-		for (auto it = m_Entities.begin(); it != m_Entities.end(); )
-		{
-			if ((*it)->IsPendingDestroy())
-			{
-				(*it)->Destroy();
-				it = m_Entities.erase(it);
-				printf("Entities: %i \n", m_Entities.size());
-				continue;
-			}
-
-			(*it)->Update(DeltaTime);
-			++it;
-		}
-	
-		m_CleanDebugAccumulator += DeltaTime;
-
-		if (m_CleanDebugAccumulator > 1)
-		{
-			m_DebugCollisions.clear();
-			m_CleanDebugAccumulator = 0;
-		}
-	
 		for (const auto& ObjAPtr : m_DynamicComponents)
 		{
 			if (auto Obj = ObjAPtr.lock())
@@ -213,7 +158,45 @@ namespace Engine
 		}
 	}
 
-	void Scene::DrawDebugCollisions()
+	void Scene::UpdateDebugCollisions(float DeltaTime)
+	{
+		m_CleanDebugAccumulator += DeltaTime;
+
+		if (m_CleanDebugAccumulator > 1)
+		{
+			m_DebugCollisions.clear();
+			m_CleanDebugAccumulator = 0;
+		}
+	}
+
+	void Scene::Update(float DeltaTime)
+	{
+		UpdateEntities(DeltaTime);
+
+#if DEBUG_COLLISIONS
+		UpdateDebugCollisions(DeltaTime);
+#endif
+		UpdateCollisions();
+	}
+
+	void Scene::UpdateEntities(float DeltaTime)
+	{
+		for (auto it = m_Entities.begin(); it != m_Entities.end(); )
+		{
+			if ((*it)->IsPendingDestroy())
+			{
+				(*it)->Destroy();
+				it = m_Entities.erase(it);
+				printf("Entities: %llu \n", m_Entities.size());
+				continue;
+			}
+
+			(*it)->Update(DeltaTime);
+			++it;
+		}
+	}
+
+	void Scene::DrawDebugCollisions() const
 	{
 		for (auto& ElementPtr : m_DebugCollisions)
 		{
@@ -230,7 +213,7 @@ namespace Engine
 		}
 	}
 
-	void Scene::Draw()
+	void Scene::Draw() const
 	{
 		for (const auto& Entity : m_Entities)
 		{
@@ -242,6 +225,16 @@ namespace Engine
 #endif
 	}
 
+	void Scene::Initialize()
+	{
+		for (const auto& Entity : m_Entities)
+		{
+			Entity->Initialize();
+		}
+		
+		bIsInitialized = true;
+	}
+
 	void Scene::UnInitialize()
 	{
 		for (const auto& Entity : m_Entities)
@@ -250,39 +243,67 @@ namespace Engine
 		}
 	
 		m_Entities.clear();
+		bIsInitialized = false;
 	}
 
-	void Scene::AddEntity(unique_ptr<Entity> Entity)
+	void Scene::AddEntity(shared_ptr<Entity> Entity, const Vector2D<int> Position)
 	{
-		m_Entities.push_back(move(Entity));
-
-		printf("Entities: %i \n", m_Entities.size());
+		if (const auto Physics = Entity->GetComponentWeak<PhysicsComponent>().lock())
+		{
+			SetPhysics(Physics, Position);
+		}
+		
+		if (bIsInitialized)
+		{
+			Entity->Initialize();
+		}
+		
+		AddEntity(std::move(Entity));
 	}
 
-	void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity)
+	void Scene::AddEntity(shared_ptr<Entity> Entity)
+	{
+		m_Entities.push_back(std::move(Entity));
+		printf("Entities: %llu \n", m_Entities.size());
+	}
+
+	void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent)
 	{
 		ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-		unique_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile");
-
-		if (auto Physics = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
-		{
-			InitPhysics(Physics, Position.X, Position.Y);
-			m_DynamicComponents.push_back(Physics); //todo: merge to single place
-		}
+		shared_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile", Parent);
 
 		if (const auto Projectile = NewEntity->GetComponentWeak<ProjectileMovementComponent>().lock())
 		{
 			Projectile->SetVelocity(Velocity);
 		}
 
-		NewEntity->Initialize();
-		AddEntity(move(NewEntity));
+		AddEntity(std::move(NewEntity), Position);
 	}
 
-	void Scene::InitPhysics(shared_ptr<PhysicsComponent> Physics, int PositionX, int PositionY)
+	void Scene::SetPhysics(const shared_ptr<PhysicsComponent>& Physics, const Vector2D<int> Position)
 	{
+		Physics->SetPosition(Position.X, Position.Y);
+
 		const SDL_Rect Rect = Physics->GetRectTransform();
-		Physics->SetPosition(PositionX, PositionY);
+
+		if (Physics->IsStatic())
+		{
+			const int Row = Rect.x / Rect.w;
+			const int Col = Rect.y / Rect.h;
+			const int Index = GetTileIndex(Row, Col);
+
+			if (Index >= static_cast<int>(m_StaticTiles.size()))
+			{
+				m_StaticTiles.resize(Index + 1);
+			}
+					
+			m_StaticTiles[Index] = Physics;
+		}
+		else
+		{
+			m_DynamicComponents.push_back(Physics);
+		}
+
 		Physics->SetScale(Rect.w, Rect.h);
 	}
 
@@ -317,16 +338,13 @@ namespace Engine
 				{
 					const char Key[] = { Character, '\0' };
 					nlohmann::json EntitySpecs = Legend[Key];
-					unique_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
+					shared_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
 				
 					if (auto Physics = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
 					{
 						const SDL_Rect Rect = Physics->GetRectTransform();
-				
-						InitPhysics(Physics, Column * Rect.w, Row * Rect.h);
-						AddEntity(std::move(NewEntity));
+						AddEntity(std::move(NewEntity), Vector2D(Column * Rect.w, Row * Rect.h));
 					}
-			
 				}
 				++Column;
 			}

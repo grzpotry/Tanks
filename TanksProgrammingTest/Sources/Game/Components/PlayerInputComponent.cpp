@@ -1,6 +1,7 @@
 #include "PlayerInputComponent.h"
 #include "Entity.h"
 #include "Engine.h"
+#include "../Config.h"
 #include "Components/PhysicsComponent.h"
 
 namespace Game
@@ -56,8 +57,7 @@ namespace Game
 
     void PlayerInputComponent::Update(float DeltaTime)
     {
-        constexpr int Speed = 400;
-        const int MoveDistance = Speed * DeltaTime;
+        const int MoveDistance = Config::PlayerSpeed * DeltaTime;
 
         if (MoveDistance == 0)
         {
@@ -123,11 +123,10 @@ namespace Game
                         {
                         case SDL_SCANCODE_SPACE:
                             {
-                                constexpr int ProjectileSpeed = 400;
-                                const auto Velocity = PhysicsComponent->GetForward() * ProjectileSpeed;
+                                const auto Velocity = PhysicsComponent->GetForward() * Config::ProjectileSpeed;
                             
                                 const Vector2D<int> StartOffset = Vector2D(10, 10) + PhysicsComponent->GetForward() * 10;
-                                Engine::Get()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity);
+                                Engine::Get()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity, GetOwner());
                             }
                             break;
                         default:

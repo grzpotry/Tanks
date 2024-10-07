@@ -1,5 +1,8 @@
 ﻿#pragma once
+#include <iostream>
 #include <SDL_rect.h>
+
+#include "EngineUtils.h"
 #include "EntityComponent.h"
 #include "Vector2D.h"
 
@@ -53,13 +56,14 @@ namespace Engine
         }
 
         void Update(float DeltaTime) override;
-        void OnCollision(shared_ptr<PhysicsComponent> Other);
+        void OnCollision(const shared_ptr<PhysicsComponent>& Other) const;
         void LoadFromConfig(nlohmann::json Config) override;
         unique_ptr<EntityComponent> Clone() const override { return make_unique<PhysicsComponent>(*this); }
     
         void SetPosition(int x, int y);
         void SetScale(int w, int h);
         void SetRotationAngle(int EulerDeg);
+        void SelfDestroyOutsideWindow() const;
 
         [[nodiscard]] SDL_Rect& GetRectTransform() { return m_RectTransform; }
         [[nodiscard]] int GetRotationAngle() const {return m_RotationAngle;}
@@ -73,12 +77,17 @@ namespace Engine
             return Center;
         }
 
-        Vector2D<int> GetForward() const { return m_Forward; }
+        [[nodiscard]] Vector2D<int> GetForward() const { return m_Forward; }
+        [[nodiscard]] uint8_t GetCollisionLayer() const { return m_CollisionLayer; }
+        [[nodiscard]] uint8_t GetDestroyOnCollisionMask() const { return m_DestroyOnCollisionMask; }
     
     private:
         bool m_IsStatic;
         SDL_Rect m_RectTransform;
         int m_RotationAngle = 0;
+
+        uint8_t m_DestroyOnCollisionMask;
+        uint8_t m_CollisionLayer;
 
         Vector2D<int> m_Forward;
     };

@@ -22,7 +22,7 @@ namespace Engine
 
                 NewComponent->SetOwner(this);
                 NewComponent->LoadFromConfig(ComponentConfig);
-                AddComponent(move(NewComponent));
+                AddComponent(std::move(NewComponent));
             }
         }
     }
@@ -72,11 +72,29 @@ namespace Engine
 
     void Entity::AddComponent(unique_ptr<EntityComponent> Component)
     {
-        m_Components.push_back(move(Component));
+        m_Components.push_back(std::move(Component));
     }
 
     void Entity::RemoveComponent(EntityComponent* Component)
     {
         //m_Components.remove(Component);
+    }
+
+    void Entity::SetParent(const weak_ptr<Entity>& Parent)
+    {
+        m_Parent = Parent;
+    }
+
+    bool Entity::IsChildOf(Entity* const Other) const
+    {
+        if (const auto Parent = GetParent().lock())
+        {
+            if (const auto OtherPtr = Other->GetWeakRef().lock())
+            {
+                return OtherPtr.get() == Parent.get();
+            }
+        }
+
+        return false;
     }
 }

@@ -396,6 +396,7 @@
     <ClCompile Include="Sources\Game\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Engine\CollisionUtils.h" />
     <ClInclude Include="Sources\Engine\Components\EntityComponent.h" />
     <ClInclude Include="Sources\Engine\Components\PhysicsComponent.h" />
     <ClInclude Include="Sources\Engine\Components\ProjectileMovementComponent.h" />
@@ -407,6 +408,7 @@
     <ClInclude Include="Sources\Engine\EngineUtils.h" />
     <ClInclude Include="Sources\Engine\Vector2D.h" />
     <ClInclude Include="Sources\Game\Components\PlayerInputComponent.h" />
+    <ClInclude Include="Sources\Game\Config.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

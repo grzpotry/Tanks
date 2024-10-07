@@ -165,11 +165,11 @@ namespace Engine
 		return m_ActiveScene->QueryCollisions(SourceRect, SourceObj);
 	}
 
-	void Engine::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity) const
+	void Engine::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent) const
 	{
 		if (m_ActiveScene)
 		{
-			m_ActiveScene->AddProjectile(Position, Velocity);
+			m_ActiveScene->AddProjectile(Position, Velocity, Parent);
 		}
 	}
 }

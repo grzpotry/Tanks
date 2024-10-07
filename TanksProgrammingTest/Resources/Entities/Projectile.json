@@ -12,7 +12,9 @@
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
 			"Width": 10,
-			"Height": 10
+			"Height": 10,
+			"CollisionLayer": "Projectile",
+			"DestroyOnCollisionMask": "All"
 		}
 	]
 }

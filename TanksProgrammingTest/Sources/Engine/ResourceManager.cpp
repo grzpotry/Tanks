@@ -11,7 +11,7 @@
 
 namespace Engine
 {
-	ResourceManager::ResourceManager(std::string Path)
+	ResourceManager::ResourceManager(const string& Path)
 		: m_Path(Path)
 	{
 	}
@@ -22,7 +22,7 @@ namespace Engine
 		LoadResourcesFromFolder("Scenes", m_Scenes);
 	}
 
-	const nlohmann::json& ResourceManager::GetJsonConfig(string Name, enum ResourceType Type)
+	const nlohmann::json& ResourceManager::GetJsonConfig(const string& Name, ResourceType Type)
 	{
 		switch (Type)
 		{
@@ -36,12 +36,12 @@ namespace Engine
 		return DefaultJsonConfig;
 	}
 
-	void ResourceManager::RegisterComponent(string Type, EntityComponent* Component)
+	void ResourceManager::RegisterComponent(const string& Type, EntityComponent* Component)
 	{
 		m_ComponentsPrototypes[Type] = Component;
 	}
 
-	const EntityComponent* ResourceManager::GetComponentPrototypeByName(string Name)
+	const EntityComponent* ResourceManager::GetComponentPrototypeByName(const string& Name)
 	{
 		map<string, EntityComponent*>::iterator ComponentPrototypeIt = m_ComponentsPrototypes.find(Name);
 		if (ComponentPrototypeIt != m_ComponentsPrototypes.end())
@@ -52,20 +52,25 @@ namespace Engine
 		return nullptr;
 	}
 
-	unique_ptr<Entity> ResourceManager::CreateEntityFromDataTemplate(string Name)
+	shared_ptr<Entity> ResourceManager::CreateEntityFromDataTemplate(const string& Name, Entity* const Parent)
 	{
 		map<string, nlohmann::json>::iterator EntityDataTemplateIt = m_Entities.find(Name);
 		if (EntityDataTemplateIt != m_Entities.end())
 		{
-			auto NewEntity = make_unique<Entity>();
+			auto NewEntity = make_shared<Entity>();
 			NewEntity->LoadFromConfig(EntityDataTemplateIt->second);
+
+			if (Parent != nullptr)
+			{
+				NewEntity->SetParent(Parent->GetWeakRef());
+			}
 			return NewEntity;
 		}
 
 		return nullptr;
 	}
 
-	void ResourceManager::LoadResourcesFromFolder(string Folder, map<string, nlohmann::json>& MapContainer) const
+	void ResourceManager::LoadResourcesFromFolder(const string& Folder, map<string, nlohmann::json>& MapContainer) const
 	{
 		string FolderPath = m_Path + "/" + Folder;
 		for (const auto& Entry : filesystem::directory_iterator(FolderPath))
@@ -76,7 +81,7 @@ namespace Engine
 
 			if (!JsonFile.is_null())
 			{
-				wstring WStrFileName = Entry.path().stem();
+				const wstring WStrFileName = Entry.path().stem();
 				string FileName = EngineUtils::WstringToString(WStrFileName);
 				MapContainer.insert({ FileName, JsonFile });
 			}
@@ -86,7 +91,7 @@ namespace Engine
 	}
 
 
-	std::shared_ptr<SDL_Texture> ResourceManager::LoadTexture(string Path)
+	std::shared_ptr<SDL_Texture> ResourceManager::LoadTexture(const string& Path)
 	{
 		printf("Load new texture %s \n", Path.c_str());
 		SDL_Surface* Surface = IMG_Load(Path.c_str());
@@ -110,18 +115,18 @@ namespace Engine
 		return TexturePtr;
 	}
 
-	void ResourceManager::ReleaseTexture(string Path)
+	void ResourceManager::ReleaseTexture(const string& Path)
 	{
-		const auto& b = m_Textures.at(Path);
+		const auto& SharedTexture = m_Textures.at(Path);
 		
-		if (b.use_count() == 1)
+		if (SharedTexture.use_count() == 1)
 		{
 			m_Textures.erase(Path);
 			printf("Released texture %s \n", Path.c_str());
 		}
 	}
 
-	std::shared_ptr<SDL_Texture> ResourceManager::GetOrLoadTexture(string Path)
+	std::shared_ptr<SDL_Texture> ResourceManager::GetOrLoadTexture(const string& Path)
 	{
 		auto [it, inserted] = m_Textures.try_emplace(Path, nullptr);
 		
