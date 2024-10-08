@@ -5,10 +5,8 @@
 
 namespace Game
 {
-    using namespace Engine;
-    using Engine = ::Engine::Engine;
-
-
+    using namespace EngineCore;
+    
     class TankComponent : public EntityComponent
     {
     public:
@@ -23,7 +21,7 @@ namespace Game
         void ShootProjectile() const;
         bool TryMove(Vector2D<int> Direction, float DeltaTime) const;
 
-        void Initialize(Scene* Scene) override;
+        void Initialize(GameModeBase* Game) override;
 
     private:
         std::weak_ptr<PhysicsComponent> m_Physics;

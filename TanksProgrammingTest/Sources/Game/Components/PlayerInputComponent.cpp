@@ -1,7 +1,4 @@
 #include "PlayerInputComponent.h"
-#include "Entity.h"
-#include "Engine.h"
-#include "Scene.h"
 #include "TankComponent.h"
 #include "Components/PhysicsComponent.h"
 
@@ -17,23 +14,23 @@ namespace Game
     {
     }
 
-    void PlayerInputComponent::Initialize(Scene* const Scene)
+    void PlayerInputComponent::Initialize(GameModeBase* Game)
     {
-        EntityComponent::Initialize(Scene);
+        EntityComponent::Initialize(Game);
         m_WeakPhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
         m_WeakTankComponent = GetOwner()->GetComponentWeak<TankComponent>();
     }
 
     void PlayerInputComponent::UnInitialize()
     {
-        m_Scene = nullptr;
+        m_Game = nullptr;
         m_WeakPhysicsComponent.reset();
         m_WeakTankComponent.reset();
     }
 
     void PlayerInputComponent::Update(float DeltaTime)
     {
-        if (m_Scene == nullptr)
+        if (m_Game == nullptr)
         {
             return;
         }

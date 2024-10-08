@@ -9,6 +9,10 @@
 			"Type": "ProjectileMovementComponent"
 		},
 		{
+			"Type": "HealthComponent",
+			"StartValue": 1
+		},
+		{
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
 			"Width": 10,

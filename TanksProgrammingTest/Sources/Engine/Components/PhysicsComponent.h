@@ -1,12 +1,9 @@
 ﻿#pragma once
-#include <iostream>
 #include <SDL_rect.h>
-
-#include "EngineUtils.h"
 #include "EntityComponent.h"
 #include "Vector2D.h"
 
-namespace Engine
+namespace EngineCore
 {
     using namespace std;
 
@@ -86,8 +83,8 @@ namespace Engine
         SDL_Rect m_RectTransform;
         int m_RotationAngle = 0;
 
-        uint8_t m_DestroyOnCollisionMask;
-        uint8_t m_CollisionLayer;
+        uint8_t m_DestroyOnCollisionMask = 0;
+        uint8_t m_CollisionLayer = 0;
 
         Vector2D<int> m_Forward;
     };

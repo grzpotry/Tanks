@@ -12,6 +12,14 @@
 			"Type": "PlayerInputComponent"
 		},
 		{
+			"Type": "PlayerComponent",
+			"Name": "Player1"
+		},
+		{
+			"Type": "HealthComponent",
+			"StartValue": 3
+		},
+		{
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
 			"Width": 30,

@@ -1,6 +1,6 @@
 #include "EntityComponent.h"
 
-namespace Engine
+namespace EngineCore
 {
     EntityComponent::EntityComponent(Entity* Owner)
         : m_Owner(Owner)
@@ -11,9 +11,9 @@ namespace Engine
     {
     }
 
-    void EntityComponent::Initialize(Scene* const Scene)
+    void EntityComponent::Initialize(GameModeBase* Game)
     {
-        m_Scene = Scene;
+        m_Game = Game;
     }
 
     void EntityComponent::Update(float DeltaTime)
@@ -26,5 +26,6 @@ namespace Engine
 
     void EntityComponent::UnInitialize()
     {
+        m_Game = nullptr;
     }
 }

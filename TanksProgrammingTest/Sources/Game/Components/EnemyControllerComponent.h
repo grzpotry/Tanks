@@ -6,8 +6,7 @@
 
 namespace Game
 {
-    using namespace Engine;
-    using Engine = ::Engine::Engine;
+    using namespace EngineCore;
 
     using namespace std;
 
@@ -17,7 +16,7 @@ namespace Game
         EnemyControllerComponent(Entity* Owner);
         EnemyControllerComponent();
 
-        void Initialize(Scene* Scene) override;
+        void Initialize(GameModeBase* Game) override;
         void Update(float DeltaTime) override;
         void Shoot();
 

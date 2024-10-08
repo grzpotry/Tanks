@@ -1,8 +1,9 @@
 #pragma once
 #include <nlohmann/json.hpp>
 
-namespace Engine
+namespace EngineCore
 {
+    class GameModeBase;
     class Scene;
     class PhysicsComponent;
     class Entity;
@@ -25,7 +26,7 @@ namespace Engine
         virtual unique_ptr<EntityComponent> Clone() const = 0;
 
         virtual void LoadFromConfig(nlohmann::json Config);
-        virtual void Initialize(Scene* Scene);
+        virtual void Initialize(GameModeBase* Game);
         virtual void Update(float DeltaTime);
         virtual void Draw();
         virtual void UnInitialize();
@@ -36,7 +37,7 @@ namespace Engine
 
     protected:
         //~EntityComponent() = default;
-        Scene* m_Scene = nullptr;
+        GameModeBase* m_Game = nullptr;
 
     private:
         Entity* m_Owner;

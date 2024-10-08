@@ -1,14 +1,11 @@
 #pragma once
-
-#include "Engine.h"
 #include "Components/EntityComponent.h"
 
 namespace Game
 {
     class TankComponent;
     using namespace std;
-    using namespace Engine;
-    using Engine = ::Engine::Engine;
+    using namespace EngineCore;
 
     class PlayerInputComponent : public EntityComponent
     {
@@ -21,7 +18,7 @@ namespace Game
             return make_unique<PlayerInputComponent>(*this);
         }
 
-        void Initialize(Scene* Scene) override;
+        void Initialize(GameModeBase* Game) override;
         void UnInitialize() override;
         void Update(float DeltaTime) override;
 

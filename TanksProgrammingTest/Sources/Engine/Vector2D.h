@@ -2,7 +2,7 @@
 #include <complex>
 #include <type_traits>
 
-namespace Engine
+namespace EngineCore
 {
     template <typename T>
     struct Vector2D

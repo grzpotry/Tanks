@@ -5,8 +5,9 @@
 #include <cassert>
 #include <iostream>
 #include "CollisionUtils.h"
+#include "../../Game/Components/HealthComponent.h"
 
-namespace Engine
+namespace EngineCore
 {
     PhysicsComponent::PhysicsComponent() :
         EntityComponent(nullptr),
@@ -104,12 +105,17 @@ namespace Engine
             return;
         }
 
+        //TODO: rename to damageOnCollisionMask
         if (GetDestroyOnCollisionMask() & Other->GetCollisionLayer())
         {
 #if DEBUG_COLLISIONS
-            printf("auto-destroy %s on collision with %s \n", SelfEntity->GetName().c_str(), OtherEntity->GetName().c_str());
+            printf("damage %s on collision with %s \n", SelfEntity->GetName().c_str(), OtherEntity->GetName().c_str());
 #endif
-            SelfEntity->MarkDestroy();
+
+            if (const auto Health = SelfEntity->GetComponentWeak<Game::HealthComponent>().lock())
+            {
+                Health->ApplyDamage();
+            }
         }
     }
 }

@@ -9,7 +9,7 @@
 
 #include "Engine.h"
 
-namespace Engine
+namespace EngineCore
 {
 	ResourceManager::ResourceManager(const string& Path)
 		: m_Path(Path)
@@ -91,6 +91,22 @@ namespace Engine
 	}
 
 
+	shared_ptr<SDL_Texture> ResourceManager::CreateTexture(SDL_Surface* Surface)
+	{
+		return
+		{
+			SDL_CreateTextureFromSurface(Engine::Get()->GetRenderer(), Surface),
+			[](SDL_Texture* Texture)
+			{
+				if (Texture)
+				{
+					printf("SDL_DestroyTexture \n");
+					SDL_DestroyTexture(Texture);
+				}
+			}
+		};
+	}
+
 	std::shared_ptr<SDL_Texture> ResourceManager::LoadTexture(const string& Path)
 	{
 		printf("Load new texture %s \n", Path.c_str());
@@ -101,15 +117,7 @@ namespace Engine
 			printf("Couldn't load texture from path %s \n", Path.c_str());
 		}
 
-		auto TexturePtr = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(Engine::Get()->GetRenderer(), Surface),
-		                             [](SDL_Texture* Texture)
-		                             {
-			                             if (Texture)
-			                             {
-				                             SDL_DestroyTexture(Texture);
-				                             printf("Destroy texture \n");
-			                             }
-		                             });
+		auto TexturePtr = CreateTexture(Surface);
 		
 		SDL_FreeSurface(Surface);
 		return TexturePtr;

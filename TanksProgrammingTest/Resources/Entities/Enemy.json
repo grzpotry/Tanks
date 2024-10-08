@@ -9,6 +9,10 @@
 			"Type": "TankComponent"
 		},
 		{
+			"Type": "HealthComponent",
+			"StartValue": 1
+		},
+		{
 			"Type": "EnemyControllerComponent"
 		},
 		{

@@ -1,6 +1,10 @@
 Tanks Programming Test Description
 
-We have just prepared a small presentation of our game which is based on the very old classic game "Tank 1990" (https://90kids.com/tank-1990/). One of our programmers thought that it would be awesome to revive some old memories from our childhood. That being said our new game isn't really playble in the current state. It doesn't perform very well and it looks that its development stopped in the middle of the production. On top of that our Programmers in the team spotted major problems in the code, that wouldn't allow this game to go into the production line before fixing them. Unfortunately we have higher priorities right now. What could we do? I have an idea! Maybe you could help us? :)
+We have just prepared a small presentation of our game which is based on the very old classic game "Tank 1990" (https://90kids.com/tank-1990/). 
+One of our programmers thought that it would be awesome to revive some old memories from our childhood. That being said our new game isn't really playble in the current state. 
+It doesn't perform very well and it looks that its development stopped in the middle of the production. 
+On top of that our Programmers in the team spotted major problems in the code, that wouldn't allow this game to go into the production line before fixing them.
+ Unfortunately we have higher priorities right now. What could we do? I have an idea! Maybe you could help us? :)
 
 Let me give you some hints. It might actually work! ;) Let's try to do it together!
 - Try to go through the Code and make needed changes that would make the Code production ready and prepared for further development

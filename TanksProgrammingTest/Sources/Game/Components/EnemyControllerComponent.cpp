@@ -1,6 +1,4 @@
 ﻿#include "EnemyControllerComponent.h"
-#include "Engine.h"
-#include "Entity.h"
 
 namespace Game
 {
@@ -14,9 +12,9 @@ namespace Game
     {
     }
 
-    void EnemyControllerComponent::Initialize(Scene* Scene)
+    void EnemyControllerComponent::Initialize(GameModeBase* Game)
     {
-        EntityComponent::Initialize(Scene);
+        EntityComponent::Initialize(Game);
 
         m_TankComponent = GetOwner()->GetComponentWeak<TankComponent>();
     }

@@ -4,10 +4,9 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
-
 #include "EngineUtils.h"
 
-namespace Engine
+namespace EngineCore
 {
     using namespace std;
     
@@ -19,6 +18,7 @@ namespace Engine
         Wall = 1 << 2,
         Player = 1 << 3,
         Enemy = 1 << 4,
+        Flag = 1 << 5,
         All = (1 << 8) - 1
     };
 
@@ -30,6 +30,7 @@ namespace Engine
         {"Wall", CollisionLayer::Wall},
         {"Player", CollisionLayer::Player},
         {"Enemy", CollisionLayer::Enemy},
+        {"Flag", CollisionLayer::Flag},
         {"All", CollisionLayer::All}
      };
 

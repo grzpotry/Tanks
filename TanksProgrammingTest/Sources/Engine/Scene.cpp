@@ -3,49 +3,14 @@
 #include "ResourceManager.h"
 #include <fstream>
 #include "Vector2D.h"
+#include "../Game/Components/PlayerComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/PhysicsComponent.h"
 
 class ProjectileMovementComponent;
 
-namespace Engine
+namespace EngineCore
 {
-	void Scene::LoadFromConfig(nlohmann::json Config)
-	{
-		printf("LoadSceneFromConfig \n");
-		m_Name = Config.value("Name", "");
-
-		if (Config.find("Entities") != Config.end())
-		{
-			ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-			
-			for (const auto& Item : Config["Entities"].items())
-			{
-				auto NewEntity = make_unique<Entity>();
-
-				nlohmann::json EntityConfig = Item.value();
-				string TypeName = EntityConfig.value("Type", "");
-				
-				if (!TypeName.empty())
-				{
-					const nlohmann::json EntityTemplateConfig = ResourceManagerPtr->GetJsonConfig(TypeName, ResourceType::Entity);
-					NewEntity->LoadFromConfig(EntityTemplateConfig);
-				}
-				else
-				{
-					NewEntity->LoadFromConfig(Item.value());
-				}
-
-				AddEntity(std::move(NewEntity));
-			}
-		}
-
-		if (const nlohmann::json::const_iterator SceneLayoutIt = Config.find("SceneLayout"); SceneLayoutIt != Config.end())
-		{
-			LoadSceneFromLayout((*SceneLayoutIt)["Content"], (*SceneLayoutIt)["Legend"]);
-		}
-	}
-
 	int Scene::GetTileIndex(const int Row, const int Col) const
 	{
 		return (Row * m_StaticTilesRows) + Col;
@@ -177,6 +142,8 @@ namespace Engine
 		UpdateDebugCollisions(DeltaTime);
 #endif
 		UpdateCollisions();
+		
+		m_TimeToVictory -= DeltaTime;
 	}
 
 	void Scene::UpdateEntities(float DeltaTime)
@@ -187,7 +154,7 @@ namespace Engine
 			{
 				(*it)->Destroy();
 				it = m_Entities.erase(it);
-				printf("Entities: %llu \n", m_Entities.size());
+				//printf("Entities: %llu \n", m_Entities.size());
 				continue;
 			}
 
@@ -225,11 +192,18 @@ namespace Engine
 #endif
 	}
 
-	void Scene::Initialize()
+	void Scene::Initialize(GameModeBase* const ActiveGame)
 	{
+		if (bIsInitialized)
+		{
+			return;
+		}
+
+		m_ActiveGame = ActiveGame;
+		
 		for (const auto& Entity : m_Entities)
 		{
-			Entity->Initialize(this);
+			Entity->Initialize(ActiveGame);
 		}
 		
 		bIsInitialized = true;
@@ -255,7 +229,7 @@ namespace Engine
 		
 		if (bIsInitialized)
 		{
-			Entity->Initialize(this);
+			Entity->Initialize(m_ActiveGame);
 		}
 		
 		AddEntity(std::move(Entity));
@@ -264,7 +238,7 @@ namespace Engine
 	void Scene::AddEntity(shared_ptr<Entity> Entity)
 	{
 		m_Entities.push_back(std::move(Entity));
-		printf("Entities: %llu \n", m_Entities.size());
+		//printf("Entities: %llu \n", m_Entities.size());
 	}
 
 	void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent)
@@ -302,7 +276,6 @@ namespace Engine
                 
 				if (QueryCollisions(Potential, SourceObj) == 0)
 				{
-					printf("Adjusted rect position by %i \n", i);
 					FixedRect = Potential;
 					return true;
 				}

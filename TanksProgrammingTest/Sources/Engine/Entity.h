@@ -2,8 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
-namespace Engine
+namespace EngineCore
 {
+    class GameModeBase;
     class Scene;
     using namespace std;
 
@@ -18,7 +19,7 @@ namespace Engine
         }
 
         void LoadFromConfig(nlohmann::json Config);
-        void Initialize(Scene* Scene) const;
+        void Initialize(GameModeBase* const Game) const;
         void Update(float DeltaTime);
         void Draw();
         void UnInitialize();

@@ -1,15 +1,15 @@
 #include "Engine.h"
 #include <SDL.h>
 #include <stdio.h>
+#include "GameModeBase.h"
 #include "Scene.h"
 #include "ResourceManager.h"
 
-namespace Engine
+namespace EngineCore
 {
 	Engine::Engine()
 		: m_Window(nullptr)
 		, m_Renderer(nullptr)
-		, m_ActiveScene(nullptr)
 		, m_ResourceManager(nullptr)
 		, FramesPerSecond(60)
 		, TimePerFrameInSeconds(1.0f / FramesPerSecond)
@@ -47,17 +47,22 @@ namespace Engine
 
 		TTF_Init();
 
-		if (m_ActiveScene != nullptr)
+		if (m_ActiveGame != nullptr)
 		{
-			m_ActiveScene->Initialize();
+			m_ActiveGame->Initialize();
 		}
 	}
 
-	void Engine::Update(float DeltaTime)
+	void Engine::Update(float DeltaTime) const
 	{
-		if (m_ActiveScene != nullptr)
+		if (m_ActiveGame != nullptr)
 		{
-			m_ActiveScene->Update(DeltaTime);
+			m_ActiveGame->Update(DeltaTime);
+		}
+
+		if (m_GUI != nullptr)
+		{
+			m_GUI->Update(DeltaTime);
 		}
 	}
 
@@ -126,21 +131,29 @@ namespace Engine
 
 	void Engine::Draw()
 	{
-		SDL_RenderClear(m_Renderer);//back to draw
+		SDL_RenderClear(m_Renderer);
 
-		if (m_ActiveScene != nullptr)
+		if (m_ActiveGame != nullptr)
 		{
-			m_ActiveScene->Draw();
+			m_ActiveGame->Draw();
 		}
+
+		m_GUI->Draw();
 
 		SDL_RenderPresent(m_Renderer);
 	}
 
 	void Engine::ShutDown()
 	{
-		if (m_ActiveScene != nullptr)
+		if (m_ActiveGame != nullptr)
 		{
-			m_ActiveScene->UnInitialize();
+			m_ActiveGame->UnInitialize();
+		}
+
+		if (m_GUI != nullptr)
+		{
+			m_GUI->UnInitialize();
+			m_GUI = nullptr;
 		}
 
 		m_RandomGenerator = nullptr;
@@ -150,16 +163,14 @@ namespace Engine
 		SDL_Quit();
 	}
 
-	void Engine::CreateActiveSceneFromTemplate(string Name)
+	void Engine::StartGame(GameModeBase* Game)
 	{
-		if (m_ResourceManager != nullptr)
-		{
-			nlohmann::json SceneConfig = m_ResourceManager->GetJsonConfig(Name, ResourceType::Scene);
-			Scene* SceneFromTemplate = new Scene();
-			SceneFromTemplate->LoadFromConfig(SceneConfig);
-			SceneFromTemplate->Initialize();
+		m_ActiveGame = Game;
+		Game->Start();
+	}
 
-			m_ActiveScene = SceneFromTemplate;
-		}
+	void Engine::BindGUI(unique_ptr<GUI> GUI)
+	{
+		m_GUI = std::move(GUI);
 	}
 }

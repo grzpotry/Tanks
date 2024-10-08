@@ -1,9 +1,9 @@
 {
-	"Name": "Wall",
+	"Name": "Flag",
 	"Components": [
 		{
 			"Type": "TextureComponent",
-			"Texture": "BrickWall.png"
+			"Texture": "Flag.png"
 		},
 		{
 			"Type": "HealthComponent",
@@ -14,9 +14,7 @@
 			"IsStatic": true,
 			"Width": 30,
 			"Height": 35,
-			"PositionX": 0,
-			"PositionY": 0,
-			"CollisionLayer": "Wall",
+			"CollisionLayer": "Flag",
 			"DestroyOnCollisionMask": "Projectile"
 		}
 	]

@@ -2,11 +2,11 @@
 #include "Entity.h"
 #include "Components/PhysicsComponent.h"
 
-namespace Engine
+namespace EngineCore
 {
-    void ProjectileMovementComponent::Initialize(Scene* const Scene)
+    void ProjectileMovementComponent::Initialize(GameModeBase* Game)
     {
-        EntityComponent::Initialize(Scene);
+        EntityComponent::Initialize(Game);
         m_WeakPhysicsComponent = GetOwner()->GetComponentWeak<PhysicsComponent>();
     }
 

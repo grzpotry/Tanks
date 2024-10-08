@@ -4,7 +4,7 @@
 #include "Entity.h"
 #include "ResourceManager.h"
 
-namespace Engine
+namespace EngineCore
 {
 	class PhysicsComponent;
 
@@ -28,9 +28,9 @@ namespace Engine
 		}
 	}
 
-	void TextureComponent::Initialize(Scene* const Scene)
+	void TextureComponent::Initialize(GameModeBase* Game)
 	{
-		EntityComponent::Initialize(Scene);
+		EntityComponent::Initialize(Game);
 		m_PhysicsComponentWeak = GetOwner()->GetComponentWeak<PhysicsComponent>();
 		m_TexturePtr = Engine::Get()->GetResourceManager()->GetOrLoadTexture(m_TexturePath);
 	}

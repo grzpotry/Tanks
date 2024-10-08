@@ -6,7 +6,7 @@
 #include <SDL_render.h>
 #include <nlohmann/json.hpp>
 
-namespace Engine
+namespace EngineCore
 {
     using namespace std;
 
@@ -24,6 +24,8 @@ namespace Engine
     public:
         ResourceManager() = delete;
         ResourceManager(const string& Path);
+
+        static shared_ptr<SDL_Texture> CreateTexture(SDL_Surface* Surface);
 
         void LoadResources();
         const nlohmann::json& GetJsonConfig(const string& Name, enum ResourceType Type);

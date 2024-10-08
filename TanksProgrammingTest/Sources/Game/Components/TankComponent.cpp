@@ -1,15 +1,12 @@
 ﻿#include "TankComponent.h"
-#include "PlayerInputComponent.h"
-#include "Entity.h"
-#include "Engine.h"
-#include "Scene.h"
+#include "EngineUtils.h"
+#include "GameModeBase.h"
 #include "../Config.h"
 #include "Components/PhysicsComponent.h"
 
 namespace Game
 {
-    using namespace Engine;
-    using Engine = ::Engine::Engine;
+    using namespace EngineCore;
     
     TankComponent::TankComponent(Entity* Owner)
         : EntityComponent(Owner)
@@ -28,7 +25,7 @@ namespace Game
             const SDL_Rect Rectangle = Physics->GetRectTransform();
                             
             const Vector2D<int> StartOffset = Vector2D(10, 10) + Physics->GetForward() * 10;
-            m_Scene->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity, GetOwner());
+            m_Game->GetActiveScene()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity, GetOwner());
         }
     }
 
@@ -72,7 +69,7 @@ namespace Game
             Rectangle.x += Direction.X * MoveDistance;
             Rectangle.y += Direction.Y * MoveDistance;
             
-            const int Collisions = m_Scene->QueryCollisions(Rectangle, Physics);
+            const int Collisions = m_Game->GetActiveScene()->QueryCollisions(Rectangle, Physics);
             const auto PhysicsRect = &Physics->GetRectTransform();
 
             bool bSuccess = Collisions == 0;
@@ -82,7 +79,7 @@ namespace Game
                 SDL_Rect OutAdjustedRect;
                 const bool AdjustX = Direction.Y != 0;
 
-                if (m_Scene->TryFindBetterMovePosition(Rectangle, Physics, OutAdjustedRect, AdjustX))
+                if (m_Game->GetActiveScene()->TryFindBetterMovePosition(Rectangle, Physics, OutAdjustedRect, AdjustX))
                 {
                     Rectangle.x = OutAdjustedRect.x;
                     Rectangle.y = OutAdjustedRect.y;
@@ -126,9 +123,9 @@ namespace Game
         return false;
     }
 
-    void TankComponent::Initialize(Scene* Scene)
+    void TankComponent::Initialize(GameModeBase* Game)
     {
-        EntityComponent::Initialize(Scene);
+        EntityComponent::Initialize(Game);
 
         m_Physics = GetOwner()->GetComponentWeak<PhysicsComponent>();
     }

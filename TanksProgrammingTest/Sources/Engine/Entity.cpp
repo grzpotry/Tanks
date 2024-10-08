@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 
-namespace Engine
+namespace EngineCore
 {
     void Entity::LoadFromConfig(nlohmann::json Config)
     {
@@ -27,11 +27,11 @@ namespace Engine
         }
     }
 
-    void Entity::Initialize(Scene* const Scene) const
+    void Entity::Initialize(GameModeBase* const Game) const
     {
         for (const auto& Component : m_Components)
         {
-            Component->Initialize(Scene);
+            Component->Initialize(Game);
         }
     }
 
