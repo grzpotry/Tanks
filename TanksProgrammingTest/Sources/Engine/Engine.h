@@ -8,6 +8,7 @@
 #include "Vector2D.h"
 
 #define DEBUG_COLLISIONS false
+#define ENABLE_PROFILING false
 
 namespace EngineCore
 {

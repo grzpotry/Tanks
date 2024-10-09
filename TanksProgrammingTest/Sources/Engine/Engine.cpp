@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include <SDL.h>
 #include <stdio.h>
+
+#include "EngineUtils.h"
 #include "GameModeBase.h"
 #include "Scene.h"
 #include "ResourceManager.h"
@@ -75,6 +77,9 @@ namespace EngineCore
 
 		while (!Close)
 		{
+			string FrameNumber = "Frame" + std::to_string(FrameCount);
+			EngineUtils::ProfileScope _(FrameNumber);
+			
 			const unsigned int NewTime = SDL_GetTicks();
 			const unsigned int NextFrameTimeMs = NewTime - CurrentTime;
 			double DeltaTime = NextFrameTimeMs /1000.0f;
@@ -112,7 +117,7 @@ namespace EngineCore
 			{
 				FixedUpdateAccumulator = 0.0f;
 			}
-		
+			
 			Draw();
 
 			DeltaTime = (SDL_GetTicks() - NewTime) / 1000.0f;
@@ -120,17 +125,17 @@ namespace EngineCore
 			if (DeltaTime < TimePerFrameInSeconds)
 			{
 				Uint32 ms = static_cast<Uint32>((TimePerFrameInSeconds - DeltaTime) * 1000.0f);
-				//printf("Frame rendered in %i", ms);
 				SDL_Delay(ms);
 			}
-
-			//printf("frame %i \n", FrameCount);
+			
 			m_Events.clear();
 		}
 	}
 
 	void Engine::Draw()
 	{
+		EngineUtils::ProfileScope _("Engine::Draw()");
+		
 		SDL_RenderClear(m_Renderer);
 
 		if (m_ActiveGame != nullptr)

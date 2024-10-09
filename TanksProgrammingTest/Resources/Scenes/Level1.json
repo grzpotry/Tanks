@@ -1,7 +1,6 @@
 {
 	"Name": "MainScene",
-	"TimeToVictory": 60.0,
-	"Entities": [],
+	"TimeToVictory": 30.0,
 	"SceneLayout": {
 		"Legend": {
 			"*": {
@@ -17,9 +16,6 @@
 		"PositionMarkers": {
 			"E": {
 				"Type": "EnemySpawn"
-			},
-			"P": {
-				"Type": "PlayerSpawn"
 			}
 		},
 		"Content": [
@@ -36,7 +32,7 @@
 			"+ + * + *   *****   * + * + +",
 			"+ + * + *           * + * + +",
 			"+   *   *   *****   *   *   +",
-			"+           * P *           +",
+			"+           *   *           +",
 			"+           * F *           +",
 			"+++++++++++++++++++++++++++++"
 		]

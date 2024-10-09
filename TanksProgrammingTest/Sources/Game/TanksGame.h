@@ -16,33 +16,37 @@ namespace Game
             : GameModeBase(Engine, ResourcesManager)
         {
             GameStarted = make_shared<Event<>>();
+            StageChanged = make_shared<Event<>>();
         }
 
         ~TanksGame() override
         {
+            StageChanged = nullptr;
             GameStarted = nullptr;
             m_Players.clear();
         }
 
         TanksGame(const TanksGame& other) = delete;
 
-        void CreateDefaultEntities(nlohmann::json Config, std::list<shared_ptr<PlayerComponent>>& Players) const;
-        void CreateNewScene(nlohmann::json Config, std::list<shared_ptr<PlayerComponent>>& Players);
+        void CreateDefaultEntities(nlohmann::json Config) const;
+        void CreateNewScene(nlohmann::json Config);
         void Start() override;
         void UnInitialize() override;
         
         shared_ptr<Event<>> GameStarted;
+        shared_ptr<Event<>> StageChanged;
 
-        std::list<shared_ptr<PlayerComponent>>& GetPlayers() {return m_Players;}
+        std::list<shared_ptr<Entity>>& GetPlayers() {return m_Players;}
+
+        unsigned short GetCurrentStage() const { return m_CurrentStage; }
 
     private:
         unsigned short m_CurrentStage = 0;
-        unsigned short m_CurrentLives = 3;
 
         void NextStage();
 
         //std::shared_ptr<TextWidget> m_CurrentStageWidget;
-        std::list<shared_ptr<PlayerComponent>> m_Players;
+        std::list<shared_ptr<Entity>> m_Players;
         //std::unique_ptr<TanksGUI> m_GUI;
     };
 }

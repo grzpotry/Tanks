@@ -14,8 +14,9 @@ namespace Game
     {
     public:
         TanksGUI(const std::shared_ptr<TanksGame>& Game);
+        void OnStageChanged() const;
 
-        void OnPlayerHealthChanged(const std::shared_ptr<PlayerComponent>& Player, const HealthComponent& Health);
+        void OnPlayerHealthChanged(const std::shared_ptr<EngineCore::Entity>& Player, const HealthComponent& Health);
         void OnGameStarted();
         void Update(float DeltaTime) override;
         void UnInitialize() override;
@@ -23,11 +24,12 @@ namespace Game
     private :
         std::shared_ptr<EngineCore::TextWidget> m_StageVictoryLabelWidget;
         std::shared_ptr<EngineCore::TextWidget> m_StageVictoryTimerWidget;
-        std::map<PlayerComponent*, std::shared_ptr<EngineCore::TextWidget>> m_PlayerHealthWidgets;
+        std::map<EngineCore::Entity*, std::shared_ptr<EngineCore::TextWidget>> m_PlayerHealthWidgets;
         std::shared_ptr<TanksGame> m_Game;
         float m_TimerUpdateCounter = 1.0f;
 
         EngineCore::ListenerHandle m_GameStartedHandle;
-        std::map<PlayerComponent*, EngineCore::ListenerHandle> m_PlayerHealthChangedHandlers;
+        EngineCore::ListenerHandle m_StageChangedHandle;
+        std::map<EngineCore::Entity*, EngineCore::ListenerHandle> m_PlayerHealthChangedHandlers;
     };
 }

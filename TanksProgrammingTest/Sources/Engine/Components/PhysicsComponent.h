@@ -56,7 +56,9 @@ namespace EngineCore
         void OnCollision(const shared_ptr<PhysicsComponent>& Other) const;
         void LoadFromConfig(nlohmann::json Config) override;
         unique_ptr<EntityComponent> Clone() const override { return make_unique<PhysicsComponent>(*this); }
-    
+
+
+        Vector2D<int> GetBoundingTile() const;
         void SetPosition(int x, int y);
         void SetScale(int w, int h);
         void SetRotationAngle(int EulerDeg);
@@ -76,16 +78,16 @@ namespace EngineCore
 
         [[nodiscard]] Vector2D<int> GetForward() const { return m_Forward; }
         [[nodiscard]] uint8_t GetCollisionLayer() const { return m_CollisionLayer; }
-        [[nodiscard]] uint8_t GetDestroyOnCollisionMask() const { return m_DestroyOnCollisionMask; }
+        [[nodiscard]] uint8_t GetDamageOnCollisionMask() const { return m_DamageOnCollisionMask; }
     
     private:
         bool m_IsStatic;
         SDL_Rect m_RectTransform;
         int m_RotationAngle = 0;
 
-        uint8_t m_DestroyOnCollisionMask = 0;
+        uint8_t m_DamageOnCollisionMask = 0;
         uint8_t m_CollisionLayer = 0;
 
-        Vector2D<int> m_Forward;
+        Vector2D<int> m_Forward = Vector2D(0, -1);
     };
 }

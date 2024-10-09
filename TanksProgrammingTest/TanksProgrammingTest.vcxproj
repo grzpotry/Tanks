@@ -241,6 +241,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Sources\Engine\Components\TeamComponent.cpp" />
     <ClCompile Include="Sources\Engine\Components\TextureComponent.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -482,6 +483,7 @@
     <ClInclude Include="Sources\Engine\Components\EntityComponent.h" />
     <ClInclude Include="Sources\Engine\Components\PhysicsComponent.h" />
     <ClInclude Include="Sources\Engine\Components\ProjectileMovementComponent.h" />
+    <ClInclude Include="Sources\Engine\Components\TeamComponent.h" />
     <ClInclude Include="Sources\Engine\Components\TextureComponent.h" />
     <ClInclude Include="Sources\Engine\Engine.h" />
     <ClInclude Include="Sources\Engine\Entity.h" />
@@ -572,7 +574,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\Sources\Engine;$(ProjectDir)\External\json-develop\single_include;$(ProjectDir)\External\SDL2-2.0.14\include;$(ProjectDir)\External\SDL2_image-2.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\Sources\Engine;$(ProjectDir)\External\json-develop\single_include;$(ProjectDir)\External\SDL2-2.0.14\include;$(ProjectDir)\External\SDL2_image-2.0.5\include;$(ProjectDir)\External\SDL2_ttf-2.22.0\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\External\SDL2-2.0.14\lib\x64;$(ProjectDir)\External\SDL2_image-2.0.5\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

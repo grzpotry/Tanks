@@ -9,6 +9,10 @@
 			"Type": "TankComponent"
 		},
 		{
+			"Type": "TeamComponent",
+			"TeamId": 1
+		},
+		{
 			"Type": "PlayerInputComponent"
 		},
 		{
@@ -17,7 +21,7 @@
 		},
 		{
 			"Type": "HealthComponent",
-			"StartValue": 3
+			"StartValue": 300
 		},
 		{
 			"Type": "PhysicsComponent",
@@ -27,7 +31,7 @@
 			"PositionX": 300,
 			"PositionY": 480,
 			"CollisionLayer": "Player",
-			"DestroyOnCollisionMask": "Projectile"
+			"DamageOnCollisionMask": "Projectile"
 		}
 	]
 }

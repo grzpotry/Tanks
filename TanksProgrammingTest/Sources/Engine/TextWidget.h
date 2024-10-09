@@ -32,7 +32,6 @@ namespace EngineCore
         {
             if (m_Texture != nullptr)
             {
-                printf("UpdateTexture");
                 m_Texture.reset();
             }
             
@@ -52,7 +51,7 @@ namespace EngineCore
         }
 
     private:
-        string m_Text;
+        string m_Text = "";
         SDL_Rect m_RectTransform;
         SDL_Color m_Color;
         weak_ptr<TTF_Font> m_Font;

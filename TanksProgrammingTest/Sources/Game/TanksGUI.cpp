@@ -14,9 +14,20 @@ Game::TanksGUI::TanksGUI(const shared_ptr<TanksGame>& Game)
     {
         OnGameStarted();
     });
+
+    m_StageChangedHandle= m_Game->StageChanged->Subscribe([this]()
+    {
+        OnStageChanged();
+    });
 }
 
-void Game::TanksGUI::OnPlayerHealthChanged(const shared_ptr<PlayerComponent>& Player, const HealthComponent& Health)
+void Game::TanksGUI::OnStageChanged() const
+{
+    string text = "Stage: " + std::to_string(m_Game->GetCurrentStage());
+    m_StageVictoryLabelWidget->Update(text);
+}
+
+void Game::TanksGUI::OnPlayerHealthChanged(const shared_ptr<Entity>& Player, const HealthComponent& Health)
 {
     string text = Player->GetName() + " : " + std::to_string(Health.GetCurrentHealth());
     m_PlayerHealthWidgets[Player.get()]->Update(text);
@@ -35,8 +46,12 @@ void Game::TanksGUI::OnGameStarted()
         Rect.y = 570;
         Rect.w = 100;
         Rect.h = 40;
+        if (auto c = Player->GetComponentWeak<TeamComponent>().lock())
+        {
+            printf("");
+        }
 
-        if (const auto PlayerHealth = Player->GetOwner()->GetComponentWeak<HealthComponent>().lock())
+        if (const auto PlayerHealth = Player->GetComponentWeak<HealthComponent>().lock())
         {
             string text = Name + " : " + std::to_string(PlayerHealth->GetCurrentHealth());
             m_PlayerHealthWidgets.emplace(Player.get(), CreateTextWidget(text, Rect));
@@ -58,7 +73,7 @@ void Game::TanksGUI::OnGameStarted()
         Rect2.w = 30;
         Rect2.h = 30;
         Rect2.x = 430;
-        m_StageVictoryTimerWidget = CreateTextWidget("", Rect2);
+        m_StageVictoryTimerWidget = CreateTextWidget("Stage timer", Rect2);
     }
 }
 
@@ -80,7 +95,7 @@ void Game::TanksGUI::UnInitialize()
 
     for (const auto PlayerHandler : m_PlayerHealthChangedHandlers)
     {
-        if (const auto PlayerHealth = PlayerHandler.first->GetOwner()->GetComponentWeak<HealthComponent>().lock())
+        if (const auto PlayerHealth = PlayerHandler.first->GetComponentWeak<HealthComponent>().lock())
         {
             PlayerHealth->OnHealthChanged->Unsubscribe(PlayerHandler.second);
         }

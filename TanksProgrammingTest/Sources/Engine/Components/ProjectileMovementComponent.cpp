@@ -17,6 +17,12 @@ namespace EngineCore
 
     void ProjectileMovementComponent::Update(float DeltaTime)
     {
+        if (m_Velocity.magnitude() == 0)
+        {
+            GetOwner()->MarkDestroy();
+            return;
+        }
+        
         if (const auto PhysicsComponent = m_WeakPhysicsComponent.lock())
         {
             const auto Rect = PhysicsComponent->GetRectTransform();

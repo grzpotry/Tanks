@@ -8,6 +8,7 @@
 #include "Components/PlayerInputComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/TankComponent.h"
+#include "Components/TeamComponent.h"
 
 using namespace EngineCore;
 using namespace Game;
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
     ResourceManagerPtr->RegisterComponent("TankComponent", new TankComponent());
     ResourceManagerPtr->RegisterComponent("HealthComponent", new HealthComponent());
     ResourceManagerPtr->RegisterComponent("PlayerComponent", new PlayerComponent());
+    ResourceManagerPtr->RegisterComponent("TeamComponent", new TeamComponent());
 
   
     const auto TanksGame = std::make_shared<Game::TanksGame>(Engine::Get(), Engine::Get()->GetResourceManager());

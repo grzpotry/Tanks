@@ -32,14 +32,20 @@ namespace EngineCore
         m_RectTransform.y = Config.value("PositionY", 0);
         
         auto CollisionLayer = Config.value("CollisionLayer", "None");
-        auto DestroyCollisionMask = Config.value("DestroyOnCollisionMask", "None");
+        auto DamageCollisionMask = Config.value("DamageOnCollisionMask", "None");
         
         m_CollisionLayer = CollisionUtils::StringToCollisionMask(CollisionLayer);
-        m_DestroyOnCollisionMask = CollisionUtils::StringToCollisionMask(DestroyCollisionMask);
+        m_DamageOnCollisionMask = CollisionUtils::StringToCollisionMask(DamageCollisionMask);
 
 #if DEBUG_COLLISIONS
-        printf("CollisionLayer [%s] : %i DestroyMask [%s] : %i \n", CollisionLayer.c_str(), m_CollisionLayer, DestroyCollisionMask.c_str(), m_DestroyOnCollisionMask);
+        printf("CollisionLayer [%s] : %i DestroyMask [%s] : %i \n", CollisionLayer.c_str(), m_CollisionLayer, DamageCollisionMask.c_str(), m_DamageOnCollisionMask);
 #endif
+    }
+
+    Vector2D<int> PhysicsComponent::GetBoundingTile() const
+    {
+        constexpr int TileSize = 50; 
+        return {m_RectTransform.x / TileSize, m_RectTransform.y / TileSize};
     }
 
     void PhysicsComponent::SetPosition(int x, int y)
@@ -99,22 +105,22 @@ namespace EngineCore
             return;
         }
 
-        // avoid self-destruction (eg. from self projectile)
-        if (SelfEntity->IsChildOf(OtherEntity) || OtherEntity->IsChildOf(SelfEntity))
-        {
-            return;
-        }
+        // // avoid self-destruction (eg. from self projectile)
+        // if (SelfEntity->IsChildOf(OtherEntity) || OtherEntity->IsChildOf(SelfEntity))
+        // {
+        //     return;
+        // }
 
         //TODO: rename to damageOnCollisionMask
-        if (GetDestroyOnCollisionMask() & Other->GetCollisionLayer())
+        if (GetDamageOnCollisionMask() & Other->GetCollisionLayer())
         {
 #if DEBUG_COLLISIONS
-            printf("damage %s on collision with %s \n", SelfEntity->GetName().c_str(), OtherEntity->GetName().c_str());
+            printf("%s has damage collision with %s \n", SelfEntity->GetName().c_str(), OtherEntity->GetName().c_str());
 #endif
 
             if (const auto Health = SelfEntity->GetComponentWeak<Game::HealthComponent>().lock())
             {
-                Health->ApplyDamage();
+                Health->TryApplyDamage(OtherEntity);
             }
         }
     }

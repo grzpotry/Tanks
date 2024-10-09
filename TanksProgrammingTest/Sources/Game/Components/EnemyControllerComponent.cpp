@@ -52,7 +52,7 @@ namespace Game
 
         if (const auto Tank = m_TankComponent.lock())
         {
-            Tank->ShootProjectile();
+            Tank->TryShootProjectile();
         }
     }
 

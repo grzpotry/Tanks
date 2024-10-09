@@ -71,7 +71,7 @@ namespace Game
                             {
                             case SDL_SCANCODE_SPACE:
                                 {
-                                    TankComponent->ShootProjectile();
+                                    TankComponent->TryShootProjectile();
                                 }
                                 break;
                             default:

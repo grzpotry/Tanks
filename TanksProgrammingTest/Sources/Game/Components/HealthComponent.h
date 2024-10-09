@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "Event.h"
 #include "Components/EntityComponent.h"
+#include "Components/TeamComponent.h"
 
 namespace Game
 {
@@ -17,7 +18,7 @@ namespace Game
         void Initialize(GameModeBase* Game) override;
         void Update(float DeltaTime) override;
 
-        void ApplyDamage();
+        bool TryApplyDamage(Entity* Applier = nullptr);
         void Kill() const;
         bool IsInvulnerable() const {return m_IsInvulnerableCounter > 0;}
         void UnInitialize() override;
@@ -30,7 +31,6 @@ namespace Game
               m_StartHealth(other.m_StartHealth),
               m_CurrentHealth(other.m_CurrentHealth)
         {
-            printf("HealthComponent copy \n");
             
             if (other.OnHealthChanged)
             {
@@ -52,11 +52,13 @@ namespace Game
 
     private:
         const float InvulnerableOnDamageDuration = 1.0f;
+
+        weak_ptr<TeamComponent> m_TeamComponent;
         
-        int m_IsInvulnerableCounter;
+        short m_IsInvulnerableCounter = 0;
         float m_InvulnerableTimer = 0.0f;
 
-        int m_StartHealth = 0;
-        int m_CurrentHealth = 0;
+        short m_StartHealth = 0;
+        short m_CurrentHealth = 0;
     };
 }

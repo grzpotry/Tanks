@@ -46,7 +46,7 @@ namespace EngineCore
         virtual void Update(float DeltaTime) = 0;
         virtual void UnInitialize() = 0;
 
-        shared_ptr<TextWidget> CreateTextWidget(const std::string& Text, const SDL_Rect Rect);
+        shared_ptr<TextWidget> CreateTextWidget(const string& Text, const SDL_Rect Rect);
 
     private:
         string TitleFontPath = "WorkSans-Regular.ttf";

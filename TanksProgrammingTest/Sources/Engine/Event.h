@@ -23,7 +23,7 @@ namespace EngineCore
         void Unsubscribe(ListenerHandle Handle)
         {
             m_Listeners.erase(Handle);
-            printf("Unsubscribed, left listeners: %i \n", m_Listeners.size());
+           // printf("Unsubscribed, left listeners: %i \n", m_Listeners.size());
         }
 
         [[nodiscard]] std::shared_ptr<Event> Copy() const
@@ -33,7 +33,7 @@ namespace EngineCore
 
         ~Event()
         {
-            printf("Destroy event, left listeners: %i \n", m_Listeners.size());
+            //printf("Destroy event, left listeners: %i \n", m_Listeners.size());
         }
 
         void Invoke(Args... args)

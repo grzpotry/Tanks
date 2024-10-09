@@ -17,13 +17,19 @@ namespace Game
         {
             return std::make_unique<TankComponent>(*this);
         }
-
-        void ShootProjectile() const;
+        
+        void TryShootProjectile();
+        void Update(float DeltaTime) override;
         bool TryMove(Vector2D<int> Direction, float DeltaTime) const;
 
         void Initialize(GameModeBase* Game) override;
 
+        bool IsShootCooldownActive() const;
+
     private:
+        const float ShootCooldown = 0.5f;
+
+        float m_ShootCooldownTimer = 0.0f;
         std::weak_ptr<PhysicsComponent> m_Physics;
     };
 }

@@ -5,6 +5,8 @@
 #include <unordered_set>
 #include "Entity.h"
 #include <nlohmann/json.hpp>
+
+#include "CollisionUtils.h"
 #include "Vector2D.h"
 #include "Components/PhysicsComponent.h"
 
@@ -48,28 +50,43 @@ namespace EngineCore
         void SetPhysics(const shared_ptr<PhysicsComponent>& Physics, Vector2D<int> Position);
         
         int GetTileIndex(int Row, int Col) const;
+        static bool HasIntersection(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> Target);
         float GetTimeToVictory() const { return m_TimeToVictory; }
         
         void Initialize(GameModeBase* const ActiveGame);
         void UnInitialize();
-        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj);
+        int QueryCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj, bool bSilent, bool bStopOnFirstCollision, CollisionLayer
+                            CollisionMask);
         void UpdateCollisions();
         void UpdateDebugCollisions(float DeltaTime);
         void UpdateEntities(float DeltaTime);
+        void UpdateEnemies(float DeltaTime);
+
+
+        
         void Update(float DeltaTime);
         void Draw() const;
-        void DrawDebugCollisions() const;
+        static void DrawDebugCollisions();
 
         void AddEntity(shared_ptr<Entity> Entity, Vector2D<int> Position);
-        void AddEntity(shared_ptr<Entity> Entity);
+        
         void AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent);
+        shared_ptr<Entity> AddPlayer();
+        void CreateEntity(const string& TemplateName, shared_ptr<Entity>& NewEntity);
+        static Vector2D<int> GetRandomPosition(const vector<Vector2D<int>>& PossiblePositions);
+        void AddPredefinedEntity(const vector<Vector2D<int>>& PossiblePositions, list<weak_ptr<Entity>>& Container, const string& TemplateName);
 
         bool TryFindBetterMovePosition(SDL_Rect SourceRect, const shared_ptr<PhysicsComponent>& SourceObj, SDL_Rect& FixedRect, bool AdjustX);
-        void LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend);
+        void LoadSceneFromLayout(nlohmann::json Content, nlohmann::json Legend, nlohmann::json PositionMarkers);
+
+        float m_EnemiesSpawnTimer;
 
     private:
-        int QueryStaticCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);
-        int QueryDynamicCollisions(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> const& SourceObj = nullptr,bool bSilent = false);
+        void AddEntity(shared_ptr<Entity> Entity);
+        int QueryStaticCollisions(SDL_Rect SourceRect, CollisionLayer
+                                  CollisionMask, shared_ptr<PhysicsComponent> const& SourceObj = nullptr, bool bStopOnFirstCollision = false, bool bSilent = false) const;
+        int QueryDynamicCollisions(SDL_Rect SourceRect, CollisionLayer
+                                   CollisionMask, shared_ptr<PhysicsComponent> const& SourceObj = nullptr, bool bStopOnFirstCollision = false, bool bSilent = false);
 
         float m_TimeToVictory; 
         bool bIsInitialized = false;
@@ -77,10 +94,17 @@ namespace EngineCore
         float m_CleanDebugAccumulator = 0.0;
 
         GameModeBase* m_ActiveGame = nullptr;
-        vector<shared_ptr<Entity>> m_Entities;
-        vector<weak_ptr<PhysicsComponent>> m_StaticTiles; //TODO: cleanup expired tiles
+        list<shared_ptr<Entity>> m_Entities;
+        vector<weak_ptr<PhysicsComponent>> m_StaticTiles;
+#if DEBUG_COLLISIONS
         unordered_set<weak_ptr<PhysicsComponent>, WeakPtrHash, WeakPtrEqual> m_DebugCollisions;
-        vector<weak_ptr<PhysicsComponent>> m_DynamicComponents;
+#endif
+        list<weak_ptr<PhysicsComponent>> m_DynamicComponents;
         string m_Name;
+        vector<Vector2D<int>> m_EnemySpawnPositions;
+        vector<Vector2D<int>> m_PlayerSpawnPositions;
+
+        list<weak_ptr<Entity>> m_Enemies;
+        list<weak_ptr<Entity>> m_Players; //update
     };
 }

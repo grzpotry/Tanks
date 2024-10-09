@@ -10,7 +10,6 @@ namespace Game
 
     HealthComponent::HealthComponent() : HealthComponent(nullptr)
     {
-        printf("HealthComponent.() \n");
     }
 
     void HealthComponent::UnInitialize()
@@ -29,6 +28,7 @@ namespace Game
         EntityComponent::Initialize(Game);
 
         m_CurrentHealth = m_StartHealth;
+        m_TeamComponent = GetOwner()->GetComponentWeak<TeamComponent>();
     }
 
     void HealthComponent::Update(float DeltaTime)
@@ -47,12 +47,25 @@ namespace Game
         }
     }
 
-    void HealthComponent::ApplyDamage()
+    bool HealthComponent::TryApplyDamage(Entity* Applier)
     {
         if (IsInvulnerable() || GetOwner()->IsPendingDestroy())
         {
-            printf("INULNERABLE \n");
-            return;
+            return false;
+        }
+
+        if (Applier)
+        {
+            if (const auto SelfTeam = m_TeamComponent.lock())
+            {
+                if (const auto OtherTeam = Applier->GetComponentWeak<TeamComponent>().lock())
+                {
+                    if (OtherTeam->GetTeamId() == SelfTeam->GetTeamId())
+                    {
+                        return false;
+                    }
+                }
+            }
         }
 
         m_InvulnerableTimer = 0.0f;
@@ -63,13 +76,13 @@ namespace Game
         {
             OnHealthChanged->Invoke(*this);
         }
-        
-        printf("APPLIED DAMAGE \n");
 
         if (m_CurrentHealth <= 0)
         {
             Kill();
         }
+
+        return true;
     }
 
     void HealthComponent::Kill() const

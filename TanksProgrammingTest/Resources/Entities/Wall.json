@@ -17,7 +17,7 @@
 			"PositionX": 0,
 			"PositionY": 0,
 			"CollisionLayer": "Wall",
-			"DestroyOnCollisionMask": "Projectile"
+			"DamageOnCollisionMask": "Projectile"
 		}
 	]
 }

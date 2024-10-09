@@ -9,6 +9,9 @@
 			"Type": "ProjectileMovementComponent"
 		},
 		{
+			"Type": "TeamComponent"
+		},
+		{
 			"Type": "HealthComponent",
 			"StartValue": 1
 		},
@@ -18,7 +21,7 @@
 			"Width": 10,
 			"Height": 10,
 			"CollisionLayer": "Projectile",
-			"DestroyOnCollisionMask": "All"
+			"DamageOnCollisionMask": "All"
 		}
 	]
 }

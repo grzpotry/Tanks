@@ -2,6 +2,7 @@
 
 #include "Windows.h"
 #include <string>
+#include <SDL.h>
 
 namespace EngineUtils
 {
@@ -15,6 +16,33 @@ namespace EngineUtils
             assert(condition);                                     \
         }                                                          \
     } while (false)
+	
+	class ProfileScope
+	{
+	public:
+#if ENABLE_PROFILING
+		ProfileScope(const std::string& label)
+			: m_Label(label), m_StartTime(SDL_GetTicks())
+		{
+		}
+		
+		~ProfileScope()
+		{
+			Uint32 endTime = SDL_GetTicks();
+			Uint32 elapsed = endTime - m_StartTime;
+
+			printf("[PROFILE] %s took %i ms\n", m_Label.c_str(), elapsed);
+		}
+
+	private:
+		std::string m_Label;
+		Uint32 m_StartTime;
+#else
+		ProfileScope(const std::string& label)
+		{
+		}
+#endif
+	};
 
 	inline std::string WstringToString(std::wstring WstringToConvert)
 	{

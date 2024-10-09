@@ -17,8 +17,15 @@ namespace Game
     {
     }
 
-    void TankComponent::ShootProjectile() const
+    void TankComponent::TryShootProjectile()
     {
+        if (IsShootCooldownActive())
+        {
+            return;
+        }
+
+        m_ShootCooldownTimer = ShootCooldown;
+        
         if (const auto Physics = m_Physics.lock())
         {
             const auto Velocity = Physics->GetForward() * Config::ProjectileSpeed;
@@ -26,6 +33,14 @@ namespace Game
                             
             const Vector2D<int> StartOffset = Vector2D(10, 10) + Physics->GetForward() * 10;
             m_Game->GetActiveScene()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity, GetOwner());
+        }
+    }
+
+    void TankComponent::Update(float DeltaTime)
+    {
+        if (IsShootCooldownActive())
+        {
+            m_ShootCooldownTimer -= DeltaTime;
         }
     }
 
@@ -69,7 +84,7 @@ namespace Game
             Rectangle.x += Direction.X * MoveDistance;
             Rectangle.y += Direction.Y * MoveDistance;
             
-            const int Collisions = m_Game->GetActiveScene()->QueryCollisions(Rectangle, Physics);
+            const int Collisions = m_Game->GetActiveScene()->QueryCollisions(Rectangle, Physics, true, true, CollisionLayer::WallsAndTanks);
             const auto PhysicsRect = &Physics->GetRectTransform();
 
             bool bSuccess = Collisions == 0;
@@ -128,5 +143,10 @@ namespace Game
         EntityComponent::Initialize(Game);
 
         m_Physics = GetOwner()->GetComponentWeak<PhysicsComponent>();
+    }
+
+    bool TankComponent::IsShootCooldownActive() const
+    {
+        return m_ShootCooldownTimer > 0;
     }
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cstdint>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -19,7 +20,10 @@ namespace EngineCore
         Player = 1 << 3,
         Enemy = 1 << 4,
         Flag = 1 << 5,
-        All = (1 << 8) - 1
+        All = (1 << 8) - 1,
+        Walls = Wall | StoneWall,
+        Tanks = Player | Enemy,
+        WallsAndTanks = Walls | Tanks
     };
 
     const std::unordered_map<string, CollisionLayer> LayerNameToEnum =

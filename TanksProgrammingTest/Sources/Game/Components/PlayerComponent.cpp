@@ -39,10 +39,10 @@ namespace Game
         {
             Timer = 0;
 
-            // debug self damage notifications
+            // // debug self damage notifications
             // if (const auto PlayerHealth = m_PlayerHealth.lock())
             // {
-            //     PlayerHealth->ApplyDamage();
+            //     PlayerHealth->TryApplyDamage();
             // }
         }
     }
