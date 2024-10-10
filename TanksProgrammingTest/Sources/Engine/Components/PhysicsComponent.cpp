@@ -30,6 +30,7 @@ namespace EngineCore
         m_RectTransform.h = Config.value("Height", 10);
         m_RectTransform.x = Config.value("PositionX", 0);
         m_RectTransform.y = Config.value("PositionY", 0);
+        m_MovementSpeed = Config.value("MovementSpeed", 200);
         
         auto CollisionLayer = Config.value("CollisionLayer", "None");
         auto DamageCollisionMask = Config.value("DamageOnCollisionMask", "None");
@@ -40,12 +41,6 @@ namespace EngineCore
 #if DEBUG_COLLISIONS
         printf("CollisionLayer [%s] : %i DestroyMask [%s] : %i \n", CollisionLayer.c_str(), m_CollisionLayer, DamageCollisionMask.c_str(), m_DamageOnCollisionMask);
 #endif
-    }
-
-    Vector2D<int> PhysicsComponent::GetBoundingTile() const
-    {
-        constexpr int TileSize = 50; 
-        return {m_RectTransform.x / TileSize, m_RectTransform.y / TileSize};
     }
 
     void PhysicsComponent::SetPosition(int x, int y)
@@ -90,6 +85,14 @@ namespace EngineCore
         }
     }
 
+    SDL_Point PhysicsComponent::GetCenter() const
+    {
+        SDL_Point Center;
+        Center.x = m_RectTransform.w / 2;
+        Center.y = m_RectTransform.h / 2;
+        return Center;
+    }
+
     void PhysicsComponent::Update(float DeltaTime)
     {
         SelfDestroyOutsideWindow();
@@ -104,14 +107,7 @@ namespace EngineCore
         {
             return;
         }
-
-        // // avoid self-destruction (eg. from self projectile)
-        // if (SelfEntity->IsChildOf(OtherEntity) || OtherEntity->IsChildOf(SelfEntity))
-        // {
-        //     return;
-        // }
-
-        //TODO: rename to damageOnCollisionMask
+        
         if (GetDamageOnCollisionMask() & Other->GetCollisionLayer())
         {
 #if DEBUG_COLLISIONS

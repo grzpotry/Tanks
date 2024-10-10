@@ -24,8 +24,6 @@ namespace Game
     void PlayerInputComponent::UnInitialize()
     {
         m_Game = nullptr;
-        m_WeakPhysicsComponent.reset();
-        m_WeakTankComponent.reset();
     }
 
     void PlayerInputComponent::Update(float DeltaTime)
@@ -39,11 +37,10 @@ namespace Game
         {
             if (const auto TankComponent = m_WeakTankComponent.lock())
             {
-                SDL_Rect Rectangle = PhysicsComponent->GetRectTransform();
                 const vector<SDL_Event> Events = Engine::Get()->GetEvents();
                 const Uint8* Keystates = SDL_GetKeyboardState(NULL);
 
-                //TODO: add some input handling layer
+                //TODO: add some input handling abstraction layer
                 if (Keystates[SDL_SCANCODE_LEFT] || Keystates[SDL_SCANCODE_A])
                 {
                     TankComponent->TryMove(Vector2D(-1, 0), DeltaTime);
@@ -65,18 +62,18 @@ namespace Game
                 {
                     switch (Event.type)
                     {
-                    case SDL_KEYDOWN:
-                        {
-                            switch (Event.key.keysym.scancode)
+                        case SDL_KEYDOWN:
                             {
-                            case SDL_SCANCODE_SPACE:
+                                switch (Event.key.keysym.scancode)
                                 {
-                                    TankComponent->TryShootProjectile();
+                                case SDL_SCANCODE_SPACE:
+                                    {
+                                        TankComponent->TryShootProjectile();
+                                    }
+                                    break;
+                                default:
+                                    break;
                                 }
-                                break;
-                            default:
-                                break;
-                            }
                         }
                     }
                 }

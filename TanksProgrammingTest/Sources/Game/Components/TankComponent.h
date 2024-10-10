@@ -6,7 +6,8 @@
 namespace Game
 {
     using namespace EngineCore;
-    
+
+    // game tank - can move or shoot
     class TankComponent : public EntityComponent
     {
     public:
@@ -27,7 +28,7 @@ namespace Game
         bool IsShootCooldownActive() const;
 
     private:
-        const float ShootCooldown = 0.5f;
+        const float ShootCooldown = 0.2f;
 
         float m_ShootCooldownTimer = 0.0f;
         std::weak_ptr<PhysicsComponent> m_Physics;

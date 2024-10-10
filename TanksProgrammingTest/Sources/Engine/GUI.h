@@ -1,10 +1,9 @@
 ﻿#pragma once
-#include <iostream>
 #include <list>
-#include <memory>    // For std::shared_ptr and std::unique_ptr
-#include <string>    // For std::string
-#include <SDL_rect.h> // For SDL_Rect
-#include <SDL_ttf.h>  // For TTF_Font and related functions
+#include <memory>
+#include <string>
+#include <SDL_rect.h>
+#include <SDL_ttf.h>
 #include "TextWidget.h"
 
 namespace EngineCore
@@ -13,44 +12,54 @@ namespace EngineCore
     {
         if (font)
         {
-            printf("Close Font");
             TTF_CloseFont(font);
         }
     };
 
+    enum FontSize :uint8_t
+    {
+        Small = 1 << 0,
+        Medium = 1 << 1
+    };
+
+    enum WidgetAnchor :uint8_t
+    {
+        BottomLeft = 1 << 0,
+        MiddleCenter = 1 << 1,
+        BottomCenter = 1 << 2
+    };
+
+    // Graphical User Interface, renders widgets
     class GUI
     {
     public:
         GUI()
-           
         {
-            TTF_Font* Font = TTF_OpenFont(TitleFontPath.c_str(), 24);
-
-            if (!Font)
-            {
-                std::cerr<<"Failed to open font " << TitleFontPath.c_str() << TTF_GetError();
-                return;
-            }
-            m_Font = std::shared_ptr<TTF_Font>(
-                Font,
-                FontDeleter);
+            m_SmallFont = LoadFont(32);
+            m_MediumFont = LoadFont(48);
         }
 
-        ~GUI()
+        virtual ~GUI()
         {
             printf("GUI destroyed \n");
-            m_Font = nullptr;
         }
+
+        static SDL_Rect GetLayoutRect(WidgetAnchor Anchor, int Width, int Height);
 
         void Draw() const;
         virtual void Update(float DeltaTime) = 0;
         virtual void UnInitialize() = 0;
-
-        shared_ptr<TextWidget> CreateTextWidget(const string& Text, const SDL_Rect Rect);
-
+        
+        void RemoveWidget(const shared_ptr<TextWidget>& Widget);
+        shared_ptr<TextWidget> CreateTextWidget(const string& Text, const SDL_Rect Rect, FontSize Font = Small);
+        
     private:
-        string TitleFontPath = "WorkSans-Regular.ttf";
+        const string TitleFontPath = "Resources/Fonts/ARCADE.ttf";
+        
         std::list<std::shared_ptr<TextWidget>> m_Widgets;
-        std::shared_ptr<TTF_Font> m_Font;
+        std::shared_ptr<TTF_Font> m_SmallFont;
+        std::shared_ptr<TTF_Font> m_MediumFont;
+
+        shared_ptr<TTF_Font> LoadFont(int Size) const;
     };
 }

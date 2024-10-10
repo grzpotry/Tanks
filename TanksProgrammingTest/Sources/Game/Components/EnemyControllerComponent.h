@@ -10,6 +10,7 @@ namespace Game
 
     using namespace std;
 
+    // Controls behaviour of tank enemy
     class EnemyControllerComponent : public EntityComponent
     {
     public:
@@ -29,7 +30,7 @@ namespace Game
         inline static std::list<Vector2D<int>> AllDirections = {Vector2D(0, 1), Vector2D(0, -1), Vector2D(1, 0), Vector2D(-1, 0)};
         
         const Vector2D<float> ChangeDirectionInterval = Vector2D(0.3f, 1.5f);
-        const Vector2D<float> ShootInterval = Vector2D(0.2f, 0.2f);//1.1f);
+        const Vector2D<float> ShootInterval = Vector2D(0.5f, 1.5f);
         
         weak_ptr<TankComponent> m_TankComponent;
         float m_CurrentChangeDirInterval = 0.0f;

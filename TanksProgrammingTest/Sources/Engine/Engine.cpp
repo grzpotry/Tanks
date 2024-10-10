@@ -1,7 +1,6 @@
 #include "Engine.h"
 #include <SDL.h>
 #include <stdio.h>
-
 #include "EngineUtils.h"
 #include "GameModeBase.h"
 #include "Scene.h"
@@ -11,8 +10,6 @@ namespace EngineCore
 {
 	Engine::Engine()
 		: m_Window(nullptr)
-		, m_Renderer(nullptr)
-		, m_ResourceManager(nullptr)
 		, FramesPerSecond(60)
 		, TimePerFrameInSeconds(1.0f / FramesPerSecond)
 	{
@@ -40,7 +37,7 @@ namespace EngineCore
 
 		m_Renderer = SDL_CreateRenderer(m_Window, -1, renderFlags);
 
-		m_ResourceManager = new ResourceManager("Resources");
+		m_ResourceManager = make_shared<ResourceManager>("Resources");
 		m_ResourceManager->LoadResources();
 
 		m_RandomGenerator = make_shared<std::mt19937>(RandomDevice());
@@ -161,7 +158,9 @@ namespace EngineCore
 			m_GUI = nullptr;
 		}
 
+		m_ResourceManager = nullptr;
 		m_RandomGenerator = nullptr;
+		
 		TTF_Quit();
 		SDL_DestroyRenderer(m_Renderer);
 		SDL_DestroyWindow(m_Window);

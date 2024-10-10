@@ -1,14 +1,12 @@
 ﻿#pragma once
 #include <complex>
-#include <type_traits>
 
 namespace EngineCore
 {
+    // utility 2d vector
     template <typename T>
     struct Vector2D
     {
-        //static_assert(std::is_floating_point_v<T>, "T must be floating point");
-
         T X;
         T Y;
 

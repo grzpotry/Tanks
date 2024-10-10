@@ -2,11 +2,9 @@
 #include "Engine.h"
 #include "ResourceManager.h"
 #include <fstream>
-
 #include "CollisionUtils.h"
 #include "EngineUtils.h"
 #include "Vector2D.h"
-#include "../Game/Components/PlayerComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/PhysicsComponent.h"
 #include "Components/TeamComponent.h"
@@ -20,12 +18,16 @@ namespace EngineCore
 		None = 0,
 		EnemySpawn = 1 << 0,
 		PlayerSpawn = 1 << 1,
+		HeavyEnemySpawn = 1 << 2,
+		FastEnemySpawn = 1 << 3,
 	};
 
 	static const std::unordered_map<string, PositionMarker> PositionMarkerNameToEnum =
 	{
 		{"EnemySpawn", PositionMarker::EnemySpawn},
 		{"PlayerSpawn", PositionMarker::PlayerSpawn},
+		{"HeavyEnemySpawn", PositionMarker::HeavyEnemySpawn},
+		{"FastEnemySpawn", PositionMarker::FastEnemySpawn},
 	};
 	
 	int Scene::GetTileIndex(const int Row, const int Col) const
@@ -35,7 +37,6 @@ namespace EngineCore
 
 	bool Scene::HasIntersection(SDL_Rect SourceRect, shared_ptr<PhysicsComponent> Target)
 	{
-		//EngineUtils::ProfileScope _("HasIntersection", false);
 		auto result = SDL_HasIntersection(&SourceRect, &Target->GetRectTransform());
 		return result;
 	}
@@ -121,13 +122,6 @@ namespace EngineCore
 						++it;
 						continue;
 					}
-
-					// // fast skip - remove? not really that faster than rect 
-					// if (abs(Target->GetBoundingTile().X - SourceObj->GetBoundingTile().X) > 1 || abs(Target->GetBoundingTile().Y - SourceObj->GetBoundingTile().Y) > 1)
-					// {
-					// 	++it;
-					// 	continue;
-					// }
 					
 					if (SDL_HasIntersection(&SourceRect, &Target->GetRectTransform()))
 					{
@@ -196,14 +190,16 @@ namespace EngineCore
 
 	void Scene::Update(float DeltaTime)
 	{
+		if (!m_IsInitialized)
+		{
+			return;
+		}
+		
 		EngineUtils::ProfileScope _("Scene::Update");
 
 		UpdateEntities(DeltaTime);
-
-		UpdateEnemies(DeltaTime);
-		
+		SpawnEnemies(DeltaTime);
 		UpdateDebugCollisions(DeltaTime);
-
 		UpdateCollisions();
 		
 		m_TimeToVictory -= DeltaTime;
@@ -219,7 +215,6 @@ namespace EngineCore
 			{
 				(*it)->Destroy();
 				it = m_Entities.erase(it);
-				//printf("Entities: %llu \n", m_Entities.size());
 				continue;
 			}
 
@@ -228,33 +223,59 @@ namespace EngineCore
 		}
 	}
 
-	void Scene::UpdateEnemies(float DeltaTime)
+	void Scene::TrySpawnSingleEnemy(list<weak_ptr<Entity>>& Enemies, vector<Vector2D<int>>& SpawnPositions,
+	                                const string& TemplateName, bool& IsEnemyAlreadySpawned)
 	{
-		m_EnemiesSpawnTimer += DeltaTime;
-
-		if (m_EnemiesSpawnTimer < 1)
+		if (IsEnemyAlreadySpawned)
 		{
 			return;
 		}
-
-		m_EnemiesSpawnTimer = 0;
 		
-		for (auto it = m_Enemies.begin(); it != m_Enemies.end();)
+		for (auto it = Enemies.begin(); it != Enemies.end();)
 		{
 			//clear destroyed enemies
 			if (it->expired())
 			{
-				it = m_Enemies.erase(it);
-				printf("Removed enemy \n");
+				it = Enemies.erase(it);
 				continue;
 			}
 
 			++it;
 		}
 
-		if (m_Enemies.size() < m_EnemySpawnPositions.size())
+		if (Enemies.size() < SpawnPositions.size())
 		{
-			AddPredefinedEntity(m_EnemySpawnPositions, m_Enemies, "Enemy");
+			AddPredefinedEntity(SpawnPositions, Enemies, TemplateName);
+			IsEnemyAlreadySpawned = true;
+		}
+	}
+
+	void Scene::SpawnEnemies(float DeltaTime)
+	{
+		m_EnemiesSpawnTimer += DeltaTime;
+
+		if (m_EnemiesSpawnTimer < m_EnemyRespawnCooldown && (m_Enemies.size() + m_FastEnemies.size() + m_HeavyEnemies.size()) >= m_MinEnemies)
+		{
+			return;
+		}
+
+		m_EnemiesSpawnTimer = 0;
+
+		bool bEnemyAlreadySpawned = false;
+
+		// random order - don't prioritize any type of enemy
+		std::vector<std::function<void()>> SpawnFuncs =
+		{
+			[&] { TrySpawnSingleEnemy(m_Enemies, m_EnemySpawnPositions, "Enemy", bEnemyAlreadySpawned); },
+			[&] { TrySpawnSingleEnemy(m_HeavyEnemies, m_HeavyEnemySpawnPositions, "HeavyEnemy", bEnemyAlreadySpawned); },
+			[&] { TrySpawnSingleEnemy(m_FastEnemies, m_FastEnemySpawnPositions, "FastEnemy", bEnemyAlreadySpawned); }
+		};
+		
+		std::shuffle(SpawnFuncs.begin(), SpawnFuncs.end(), *Engine::Get()->GetRandomGenerator());
+		
+		for (const auto& TrySpawn : SpawnFuncs)
+		{
+			TrySpawn();
 		}
 	}
 
@@ -291,7 +312,7 @@ namespace EngineCore
 
 	void Scene::Initialize(GameModeBase* const ActiveGame)
 	{
-		if (bIsInitialized)
+		if (m_IsInitialized)
 		{
 			return;
 		}
@@ -303,7 +324,7 @@ namespace EngineCore
 			Entity->Initialize(ActiveGame);
 		}
 		
-		bIsInitialized = true;
+		m_IsInitialized = true;
 	}
 
 	void Scene::UnInitialize()
@@ -314,7 +335,7 @@ namespace EngineCore
 		}
 	
 		m_Entities.clear();
-		bIsInitialized = false;
+		m_IsInitialized = false;
 	}
 
 	void Scene::AddEntity(shared_ptr<Entity> Entity, const Vector2D<int> Position)
@@ -324,7 +345,7 @@ namespace EngineCore
 			SetPhysics(Physics, Position);
 		}
 		
-		if (bIsInitialized)
+		if (m_IsInitialized)
 		{
 			Entity->Initialize(m_ActiveGame);
 		}
@@ -337,14 +358,23 @@ namespace EngineCore
 		m_Entities.push_back(std::move(Entity));
 	}
 
-	void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Velocity, Entity* const Parent)
+	void Scene::RemoveEntity(const shared_ptr<Entity>& Entity)
 	{
-		ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-		shared_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate("Projectile", Parent);
+		m_Entities.remove(Entity);
+	}
+
+	void Scene::AddProjectile(Vector2D<int> Position, Vector2D<int> Direction, Entity* const Parent)
+	{
+		//TODO: Add object pooling to avoid fragmentation
+		const auto ResourceManager = Engine::Get()->GetResourceManager();
+		shared_ptr<Entity> NewEntity = ResourceManager->CreateEntityFromDataTemplate("Projectile");
 
 		if (const auto Projectile = NewEntity->GetComponentWeak<ProjectileMovementComponent>().lock())
 		{
-			Projectile->SetVelocity(Velocity);
+			if (const auto Physics = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
+			{
+				Projectile->SetVelocity(Direction * Physics->GetMovementSpeed());
+			}
 		}
 
 		if (const auto SelfTeam = NewEntity->GetComponentWeak<TeamComponent>().lock())
@@ -358,18 +388,9 @@ namespace EngineCore
 		AddEntity(std::move(NewEntity), Position);
 	}
 
-	shared_ptr<Entity> Scene::AddPlayer()
+	void Scene::AddPlayer(const shared_ptr<Entity>& Player)
 	{
-		shared_ptr<Entity> PlayerEntity;
-		CreateEntity("Player",PlayerEntity);
-		AddEntity(PlayerEntity, GetRandomPosition(m_PlayerSpawnPositions));
-		return PlayerEntity;
-	}
-
-	void Scene::CreateEntity(const string& TemplateName, shared_ptr<Entity>& NewEntity)
-	{
-		ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
-		NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(TemplateName);
+		AddEntity(Player, GetRandomPosition(m_PlayerSpawnPositions));
 	}
 
 	Vector2D<int> Scene::GetRandomPosition(const vector<Vector2D<int>>& PossiblePositions)
@@ -385,7 +406,8 @@ namespace EngineCore
 			return;
 		}
 		shared_ptr<Entity> NewEntity;
-		CreateEntity(TemplateName, NewEntity);
+		
+		Engine::Get()->GetResourceManager()->CreateEntity(TemplateName, NewEntity);
 
 		const Vector2D<int> position = GetRandomPosition(PossiblePositions);
 
@@ -401,10 +423,8 @@ namespace EngineCore
 				AddEntity(std::move(NewEntity), position);
 			}
 		}
-		
 	}
-
-	//TODO: skip projectiles
+	
 	bool Scene::TryFindBetterMovePosition(SDL_Rect SourceRect, const shared_ptr<PhysicsComponent>& SourceObj,
 		SDL_Rect& FixedRect, bool AdjustX)
 	{
@@ -467,7 +487,7 @@ namespace EngineCore
 		printf("LoadSceneFromLayout \n");
 	
 		int Row = 0;
-		ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
+		auto ResourceManager = Engine::Get()->GetResourceManager();
 	
 		m_StaticTilesRows = 0;
 		int MaxCols = 0;
@@ -500,32 +520,40 @@ namespace EngineCore
 
 							auto it = PositionMarkerNameToEnum.find(marker);
 
-							if (const bool bIsMarkerFound = it != PositionMarkerNameToEnum.end())
+							if (it != PositionMarkerNameToEnum.end())
 							{
+								//TODO: replace hardcoded size of entity with actual data from file
+								int PositionX = Column * 30;
+								int PositionY = Row * 35;
+								
 								switch (it->second)
 								{
-								case EnemySpawn:
-									printf("registered spawn position \n");
-									m_EnemySpawnPositions.emplace_back(Column * 30, Row * 35);
-									break;
-								case PlayerSpawn:
-									printf("registered spawn position \n");
-									m_PlayerSpawnPositions.emplace_back(Column * 30, Row * 35);
-									break;
-								case None:
-									printf("");
+									case EnemySpawn:
+										m_EnemySpawnPositions.emplace_back(PositionX, PositionY);
+										break;
+									case HeavyEnemySpawn:
+										m_HeavyEnemySpawnPositions.emplace_back(PositionX, PositionY);
+										break;
+									case FastEnemySpawn:
+										m_FastEnemySpawnPositions.emplace_back(PositionX, PositionY);
+										break;
+									case PlayerSpawn:
+										m_PlayerSpawnPositions.emplace_back(PositionX, PositionY);
+										break;
+									case None:
+										printf("");
 								}
 							}
 						}
 						else
 						{
-							printf("invalid marker");
+							printf("invalid marker \n");
 						}
 					}
 					else
 					{
 						nlohmann::json EntitySpecs = Legend[Key];
-						shared_ptr<Entity> NewEntity = ResourceManagerPtr->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
+						shared_ptr<Entity> NewEntity = ResourceManager->CreateEntityFromDataTemplate(EntitySpecs["Type"]);
 				
 						if (auto Physics = NewEntity->GetComponentWeak<PhysicsComponent>().lock())
 						{

@@ -9,7 +9,7 @@ namespace EngineCore
     {
         m_Name = Config.value("Name", "");
 
-        ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
+        const auto ResourceManager = Engine::Get()->GetResourceManager();
 
         if (Config.find("Components") != Config.end())
         {
@@ -17,7 +17,7 @@ namespace EngineCore
             {
                 nlohmann::json ComponentConfig = ComponentItem.value();
                 string Type = ComponentConfig["Type"];
-                const EntityComponent* ComponentPrototype = ResourceManagerPtr->GetComponentPrototypeByName(Type);
+                const EntityComponent* ComponentPrototype = ResourceManager->GetComponentPrototypeByName(Type);
                 unique_ptr<EntityComponent> NewComponent = ComponentPrototype->Clone();
 
                 NewComponent->SetOwner(this);
@@ -78,23 +78,5 @@ namespace EngineCore
     void Entity::RemoveComponent(EntityComponent* Component)
     {
         //m_Components.remove(Component);
-    }
-
-    void Entity::SetParent(const weak_ptr<Entity>& Parent)
-    {
-        m_Parent = Parent;
-    }
-
-    bool Entity::IsChildOf(Entity* const Other) const
-    {
-        if (const auto Parent = GetParent().lock())
-        {
-            if (const auto OtherPtr = Other->GetWeakRef().lock())
-            {
-                return OtherPtr.get() == Parent.get();
-            }
-        }
-
-        return false;
     }
 }

@@ -8,7 +8,8 @@ namespace EngineCore
 {
     using ListenerHandle = size_t;
 
-    // Basic event, NOTE: not very safe, should be always deep copied when stored as member
+    // Basic event, stores list of subscribed listeners which can be later invoke
+    // NOTE: not very safe, should be always deep copied when stored as member
     template <typename... Args>
     class Event
     {
@@ -23,17 +24,11 @@ namespace EngineCore
         void Unsubscribe(ListenerHandle Handle)
         {
             m_Listeners.erase(Handle);
-           // printf("Unsubscribed, left listeners: %i \n", m_Listeners.size());
         }
 
         [[nodiscard]] std::shared_ptr<Event> Copy() const
         {
             return std::make_shared<Event>(*this);
-        }
-
-        ~Event()
-        {
-            //printf("Destroy event, left listeners: %i \n", m_Listeners.size());
         }
 
         void Invoke(Args... args)

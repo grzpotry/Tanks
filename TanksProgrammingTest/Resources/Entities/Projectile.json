@@ -18,6 +18,7 @@
 		{
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
+			"MovementSpeed": 600,
 			"Width": 10,
 			"Height": 10,
 			"CollisionLayer": "Projectile",

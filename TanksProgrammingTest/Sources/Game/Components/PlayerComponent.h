@@ -5,6 +5,7 @@ namespace Game
 {
     class HealthComponent;
 
+    // Deprecated - can be removed
     class PlayerComponent : public EngineCore::EntityComponent
     {
     public:
@@ -18,14 +19,11 @@ namespace Game
 
         void LoadFromConfig(nlohmann::json Config) override;
         void Initialize(EngineCore::GameModeBase* Game) override;
-        void UnInitialize() override;
-        void Update(float DeltaTime) override;
 
         std::string& GetName() { return m_Name; }
 
     private:
         std::string m_Name;
-        float Timer = 0.0f;
         std::weak_ptr<HealthComponent> m_PlayerHealth;
     };
 }

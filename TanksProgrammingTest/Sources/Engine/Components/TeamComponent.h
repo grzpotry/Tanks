@@ -3,10 +3,11 @@
 
 namespace EngineCore
 {
+    // entity team, helps identify friendly fire
     class TeamComponent : public EntityComponent
     {
     public:
-        TeamComponent(EngineCore::Entity* Owner);
+        TeamComponent(Entity* Owner);
         TeamComponent();
 
         [[nodiscard]] std::unique_ptr<EntityComponent> Clone() const override
@@ -16,7 +17,7 @@ namespace EngineCore
 
         void LoadFromConfig(nlohmann::json Config) override;
 
-        int GetTeamId() {return m_TeamId;}
+        int GetTeamId() const { return m_TeamId; }
         void SetTeamId(int TeamId);
 
     private:

@@ -1,7 +1,6 @@
 ﻿#include "TankComponent.h"
 #include "EngineUtils.h"
 #include "GameModeBase.h"
-#include "../Config.h"
 #include "Components/PhysicsComponent.h"
 
 namespace Game
@@ -28,11 +27,11 @@ namespace Game
         
         if (const auto Physics = m_Physics.lock())
         {
-            const auto Velocity = Physics->GetForward() * Config::ProjectileSpeed;
+            const auto Direction = Physics->GetForward();
             const SDL_Rect Rectangle = Physics->GetRectTransform();
                             
             const Vector2D<int> StartOffset = Vector2D(10, 10) + Physics->GetForward() * 10;
-            m_Game->GetActiveScene()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Velocity, GetOwner());
+            m_Game->GetActiveScene()->AddProjectile(Vector2D(Rectangle.x + StartOffset.X, Rectangle.y + StartOffset.Y),Direction, GetOwner());
         }
     }
 
@@ -74,7 +73,7 @@ namespace Game
                 Physics->SetRotationAngle(180);
             }
 
-            const int MoveDistance = Config::TankSpeed * DeltaTime;
+            const int MoveDistance = Physics->GetMovementSpeed() * DeltaTime;
 
             if (MoveDistance == 0)
             {
@@ -94,6 +93,7 @@ namespace Game
                 SDL_Rect OutAdjustedRect;
                 const bool AdjustX = Direction.Y != 0;
 
+                // if we collide slightly, try find nearest valid position for better movement feeling
                 if (m_Game->GetActiveScene()->TryFindBetterMovePosition(Rectangle, Physics, OutAdjustedRect, AdjustX))
                 {
                     Rectangle.x = OutAdjustedRect.x;

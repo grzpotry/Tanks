@@ -52,18 +52,13 @@ namespace EngineCore
 		return nullptr;
 	}
 
-	shared_ptr<Entity> ResourceManager::CreateEntityFromDataTemplate(const string& Name, Entity* const Parent)
+	shared_ptr<Entity> ResourceManager::CreateEntityFromDataTemplate(const string& Name)
 	{
 		map<string, nlohmann::json>::iterator EntityDataTemplateIt = m_Entities.find(Name);
 		if (EntityDataTemplateIt != m_Entities.end())
 		{
 			auto NewEntity = make_shared<Entity>();
 			NewEntity->LoadFromConfig(EntityDataTemplateIt->second);
-
-			if (Parent != nullptr)
-			{
-				NewEntity->SetParent(Parent->GetWeakRef());
-			}
 			return NewEntity;
 		}
 
@@ -89,7 +84,6 @@ namespace EngineCore
 			InFile.close();
 		}
 	}
-
 
 	shared_ptr<SDL_Texture> ResourceManager::CreateTexture(SDL_Surface* Surface)
 	{
@@ -132,6 +126,16 @@ namespace EngineCore
 			m_Textures.erase(Path);
 			printf("Released texture %s \n", Path.c_str());
 		}
+	}
+
+	void ResourceManager::CreateEntity(const string& TemplateName, shared_ptr<Entity>& NewEntity)
+	{
+		NewEntity = CreateEntityFromDataTemplate(TemplateName);
+	}
+
+	int ResourceManager::CountScenes(const string& SceneName) const
+	{
+		return m_Scenes.count(SceneName);
 	}
 
 	std::shared_ptr<SDL_Texture> ResourceManager::GetOrLoadTexture(const string& Path)

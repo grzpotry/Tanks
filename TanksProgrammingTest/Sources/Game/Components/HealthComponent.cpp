@@ -1,5 +1,7 @@
 ﻿#include "HealthComponent.h"
 
+#include "GameModeBase.h"
+
 namespace Game
 {
     HealthComponent::HealthComponent(Entity* Owner)
@@ -21,6 +23,8 @@ namespace Game
     void HealthComponent::LoadFromConfig(nlohmann::json Config)
     {
         m_StartHealth = Config.value("StartValue", 1);
+        m_TriggerGameOverOnKill = Config.value("TriggersGameOverOnKill", false);
+        m_CurrentHealth = m_StartHealth;
     }
 
     void HealthComponent::Initialize(GameModeBase* Game)
@@ -88,5 +92,10 @@ namespace Game
     void HealthComponent::Kill() const
     {
         GetOwner()->MarkDestroy();
+
+        if (m_TriggerGameOverOnKill)
+        {
+            m_Game->RequestGameOver(GetOwner());
+        }
     }
 }

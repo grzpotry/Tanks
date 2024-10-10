@@ -1,0 +1,32 @@
+{
+	"Name": "HeavyEnemy",
+	"Components": [
+		{
+			"Type": "TextureComponent",
+			"Texture": "HeavyTank.png"
+		},
+		{
+			"Type": "TankComponent"
+		},
+		{
+			"Type": "TeamComponent",
+			"TeamId": 0
+		},
+		{
+			"Type": "HealthComponent",
+			"StartValue": 2
+		},
+		{
+			"Type": "EnemyControllerComponent"
+		},
+		{
+			"Type": "PhysicsComponent",
+			"IsStatic": false,
+			"MovementSpeed": 100,
+			"Width": 30,
+			"Height": 35,
+			"CollisionLayer": "Enemy",
+			"DamageOnCollisionMask": "Projectile"
+		}
+	]
+}

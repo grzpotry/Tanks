@@ -9,22 +9,18 @@ namespace EngineCore
     class Entity;
     
     using namespace std;
-
-    /*
-     */
+    
     class EntityComponent
     {
     public:
-        virtual ~EntityComponent()
-        {
-            //printf("Destroy component");
-        }
-
         EntityComponent() = delete;
         EntityComponent(Entity* Owner);
+        virtual ~EntityComponent() = default;
+        
+        EntityComponent(const EntityComponent& other) = default;
+        EntityComponent& operator=(const EntityComponent& other) = default;
 
         virtual unique_ptr<EntityComponent> Clone() const = 0;
-
         virtual void LoadFromConfig(nlohmann::json Config);
         virtual void Initialize(GameModeBase* Game);
         virtual void Update(float DeltaTime);
@@ -36,7 +32,6 @@ namespace EngineCore
         void SetOwner(Entity* Owner) { m_Owner = Owner; }
 
     protected:
-        //~EntityComponent() = default;
         GameModeBase* m_Game = nullptr;
 
     private:

@@ -38,6 +38,7 @@ namespace EngineCore
         {"All", CollisionLayer::All}
      };
 
+    // Utility to handle 2d collisions
     class CollisionUtils
     {
         public:

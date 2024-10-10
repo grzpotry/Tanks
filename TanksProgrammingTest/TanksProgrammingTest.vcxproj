@@ -500,7 +500,6 @@
     <ClInclude Include="Sources\Game\Components\PlayerComponent.h" />
     <ClInclude Include="Sources\Game\Components\PlayerInputComponent.h" />
     <ClInclude Include="Sources\Game\Components\TankComponent.h" />
-    <ClInclude Include="Sources\Game\Config.h" />
     <ClInclude Include="Sources\Game\TanksGame.h" />
     <ClInclude Include="Sources\Game\TanksGUI.h" />
   </ItemGroup>

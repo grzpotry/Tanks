@@ -23,28 +23,4 @@ namespace Game
         EntityComponent::Initialize(Game);
         m_PlayerHealth = GetOwner()->GetComponentWeak<HealthComponent>();
     }
-
-    void PlayerComponent::UnInitialize()
-    {
-        EntityComponent::UnInitialize();
-    }
-
-    void PlayerComponent::Update(float DeltaTime)
-    {
-        EntityComponent::Update(DeltaTime);
-
-        Timer += DeltaTime;
-
-        if (Timer > 1)
-        {
-            Timer = 0;
-
-            // // debug self damage notifications
-            // if (const auto PlayerHealth = m_PlayerHealth.lock())
-            // {
-            //     PlayerHealth->TryApplyDamage();
-            // }
-        }
-    }
-
 }

@@ -7,6 +7,7 @@ namespace Game
     using namespace std;
     using namespace EngineCore;
 
+    // Handles human player input
     class PlayerInputComponent : public EntityComponent
     {
     public:

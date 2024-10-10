@@ -8,27 +8,12 @@ namespace EngineCore
 {
 	using namespace std;
 
-	struct SDL_Deleter
-	{
-		void operator()(SDL_Window* p) const { SDL_DestroyWindow(p); }
-		void operator()(SDL_Renderer* p) const { SDL_DestroyRenderer(p); }
-
-		void operator()(SDL_Texture* p) const
-		{
-			SDL_DestroyTexture(p);
-		}
-	};
-
+	// draws texture on screen
 	class TextureComponent : public EntityComponent
 	{
 	public:
 		TextureComponent(Entity* Owner);
 		TextureComponent();
-
-		~TextureComponent() override
-		{
-			m_TexturePtr = nullptr;
-		}
 
 		TextureComponent(const TextureComponent& other)
 			: EntityComponent(other),
@@ -74,8 +59,6 @@ namespace EngineCore
 		void UnInitialize() override;
 		void Draw() override;
 		void SetTextureFromAssetName(string Name);
-
-	protected:
 
 	private:
 		weak_ptr<PhysicsComponent> m_PhysicsComponentWeak;

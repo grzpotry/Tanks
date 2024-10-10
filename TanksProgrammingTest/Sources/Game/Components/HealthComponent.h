@@ -8,21 +8,13 @@ namespace Game
 {
     using namespace EngineCore;
 
+    // Defines health attribute, such entity can be killed
     class HealthComponent : public EntityComponent
     {
     public:
         HealthComponent(Entity* Owner);
         HealthComponent();
-
-        void LoadFromConfig(nlohmann::json Config) override;
-        void Initialize(GameModeBase* Game) override;
-        void Update(float DeltaTime) override;
-
-        bool TryApplyDamage(Entity* Applier = nullptr);
-        void Kill() const;
-        bool IsInvulnerable() const {return m_IsInvulnerableCounter > 0;}
-        void UnInitialize() override;
-
+        
         HealthComponent(const HealthComponent& other)
             : EntityComponent(other),
               InvulnerableOnDamageDuration(other.InvulnerableOnDamageDuration),
@@ -48,17 +40,25 @@ namespace Game
         }
 
         shared_ptr<Event<HealthComponent&>> OnHealthChanged;
-        int GetCurrentHealth() const {return m_CurrentHealth;}
+        
+        void LoadFromConfig(nlohmann::json Config) override;
+        void Initialize(GameModeBase* Game) override;
+        void UnInitialize() override;
+        void Update(float DeltaTime) override;
+        bool TryApplyDamage(Entity* Applier = nullptr);
+        void Kill() const;
+        
+        int GetCurrentHealth() const { return m_CurrentHealth; }
+        bool IsInvulnerable() const { return m_IsInvulnerableCounter > 0; }
 
     private:
-        const float InvulnerableOnDamageDuration = 1.0f;
-
-        weak_ptr<TeamComponent> m_TeamComponent;
-        
+        const float InvulnerableOnDamageDuration = 0.5f;
+        bool m_TriggerGameOverOnKill = false;
         short m_IsInvulnerableCounter = 0;
         float m_InvulnerableTimer = 0.0f;
+        int m_StartHealth = 0;
+        int m_CurrentHealth = 0;
 
-        short m_StartHealth = 0;
-        short m_CurrentHealth = 0;
+        weak_ptr<TeamComponent> m_TeamComponent;
     };
 }

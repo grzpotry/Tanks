@@ -6,6 +6,7 @@ namespace EngineCore
 {
     using namespace std;
 
+    // Controls projectile movement
     class ProjectileMovementComponent : public EntityComponent
     {
     public:
@@ -18,8 +19,6 @@ namespace EngineCore
             EntityComponent(Owner)
         {
         }
-
-        ~ProjectileMovementComponent() override = default;
 
         unique_ptr<EntityComponent> Clone() const override { return make_unique<ProjectileMovementComponent>(*this); }
 

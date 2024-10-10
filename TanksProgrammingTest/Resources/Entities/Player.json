@@ -21,11 +21,13 @@
 		},
 		{
 			"Type": "HealthComponent",
-			"StartValue": 300
+			"TriggersGameOverOnKill": true,
+			"StartValue": 3
 		},
 		{
 			"Type": "PhysicsComponent",
 			"IsStatic": false,
+			"MovementSpeed": 250,
 			"Width": 30,
 			"Height": 35,
 			"PositionX": 300,

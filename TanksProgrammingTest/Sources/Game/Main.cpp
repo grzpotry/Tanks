@@ -15,9 +15,11 @@ using namespace Game;
 
 int main(int argc, char* argv[])
 {
-    Engine::Get()->Initialize();
+    auto Engine = Engine::Get();
+    Engine->Initialize();
 
-    ResourceManager* ResourceManagerPtr = Engine::Get()->GetResourceManager();
+    const auto ResourceManagerPtr = Engine->GetResourceManager();
+    
     ResourceManagerPtr->RegisterComponent("PlayerInputComponent", new PlayerInputComponent());
     ResourceManagerPtr->RegisterComponent("TextureComponent", new TextureComponent());
     ResourceManagerPtr->RegisterComponent("PhysicsComponent", new PhysicsComponent());
@@ -27,16 +29,14 @@ int main(int argc, char* argv[])
     ResourceManagerPtr->RegisterComponent("HealthComponent", new HealthComponent());
     ResourceManagerPtr->RegisterComponent("PlayerComponent", new PlayerComponent());
     ResourceManagerPtr->RegisterComponent("TeamComponent", new TeamComponent());
-
   
-    const auto TanksGame = std::make_shared<Game::TanksGame>(Engine::Get(), Engine::Get()->GetResourceManager());
+    auto TanksGame = std::make_shared<Game::TanksGame>(Engine, Engine->GetResourceManager());
     auto GUI = make_unique<TanksGUI>(TanksGame);
 
-    Engine::Get()->BindGUI(std::move(GUI));
-    
-    Engine::Get()->StartGame(TanksGame.get());
-    Engine::Get()->MainLoop();
-    Engine::Get()->ShutDown();
+    Engine->BindGUI(std::move(GUI));
+    Engine->StartGame(TanksGame.get());
+    Engine->MainLoop();
+    Engine->ShutDown();
 
     return 0;
 }

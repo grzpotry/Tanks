@@ -1,0 +1,51 @@
+{
+	"Name": "Level2",
+	"TimeToVictory": 55.0,
+	"MinEnemies": 4.0,
+	"EnemyRespawnCooldown": 2.0,
+	"SceneLayout": {
+		"Legend": {
+			"*": {
+				"Type": "Wall"
+			},
+			"+": {
+				"Type": "StoneWall"
+			},
+			"F": {
+				"Type": "Flag"
+			}
+		},
+		"PositionMarkers": {
+			"E": {
+				"Type": "EnemySpawn"
+			},
+			"H": {
+				"Type": "HeavyEnemySpawn"
+			},
+			"S": {
+				"Type": "FastEnemySpawn"
+			},
+			"P": {
+				"Type": "PlayerSpawn"
+			}
+		},
+		"Content": [
+			"+++++++++++++++++++++++++++++",
+			"+  ***  E *****   *****  S  +",
+			"+ +++     *   *   *   *  ++++",
+			"+     *** *****   *****     +",
+			"+  E  *   *    H      *     +",
+			"+     *****   ***     ***   +",
+			"+ H         *   *     *     +",
+			"+ +++       *****   +++     +",
+			"+     ***         ***       +",
+			"+   *   *   *****   *   * E +",
+			"+ + * + *   *****   * + * + +",
+			"+ + * + *           * + * + +",
+			"+   *****  P*****   *****   +",
+			"+     +  * F *   *          +",
+			"+        ***********        +",
+			"+++++++++++++++++++++++++++++"
+		]
+	}
+}

@@ -9,6 +9,7 @@ namespace EngineCore
 {
     using namespace std;
 
+    // UI widget with specific font and text
     class TextWidget
     {
     public:
@@ -18,40 +19,16 @@ namespace EngineCore
             UpdateTexture();
         }
 
-        ~TextWidget()
-        {
-            printf("Destroyed text widget %s \n", m_Text.c_str());
-            m_Font.reset();
-            m_Texture = nullptr;
-        }
-
         void Draw() const;
         void Update(const string& Text);
 
-        void UpdateTexture()
-        {
-            if (m_Texture != nullptr)
-            {
-                m_Texture.reset();
-            }
-            
-            if (auto Font = m_Font.lock())
-            {
-                SDL_Surface* Surface = TTF_RenderText_Blended (Font.get(), m_Text.c_str(), m_Color);
-            
-                if (!Surface)
-                {
-                    SDL_Log("Failed to create text surface: %s", TTF_GetError());
-                    return;
-                }
-
-                m_Texture = ResourceManager::CreateTexture(Surface);
-                SDL_FreeSurface(Surface);
-            }
-        }
+        void UpdateTexture();
+        bool IsVisible() const { return m_IsVisible; }
+        void SetIsVisible(bool IsVisible);
 
     private:
-        string m_Text = "";
+        bool m_IsVisible = true;
+        string m_Text;
         SDL_Rect m_RectTransform;
         SDL_Color m_Color;
         weak_ptr<TTF_Font> m_Font;
