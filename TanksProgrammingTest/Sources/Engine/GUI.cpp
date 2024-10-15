@@ -17,10 +17,8 @@ namespace EngineCore
         }
     }
 
-    std::shared_ptr<TextWidget> GUI::CreateTextWidget(const string& Text, const SDL_Rect Rect, FontSize Font)
+    std::shared_ptr<TextWidget> GUI::CreateTextWidget(const string& Text, const SDL_Rect Rect, std::vector<shared_ptr<TextWidget>>* ParentPanel, FontSize Font, SDL_Color Color)
     {
-        SDL_Color Color = {255, 255, 255, 255};
-
         weak_ptr font = m_SmallFont;
 
         switch (Font)
@@ -29,11 +27,18 @@ namespace EngineCore
                 break;
             case Medium:
                 font = m_MediumFont;
+            case Large:
+                font = m_LargeFont;
                 break;
         }
         
         const auto Widget = make_shared<TextWidget>(Text, Rect, Color, font);
         m_Widgets.push_back(Widget);
+
+        if (ParentPanel)
+        {
+            ParentPanel->push_back(Widget);
+        }
 
         return Widget;
     }
@@ -57,6 +62,10 @@ namespace EngineCore
             case MiddleCenter:
                 c.x = WindowSize.X / 2 - Width / 2;
                 c.y = WindowSize.Y / 2 - Height / 2;
+                break;
+            case TopCenter:
+                c.x = WindowSize.X / 2 - Width / 2;
+                c.y = VerticalMargin;
                 break;
             case BottomCenter:
                 c.x = WindowSize.X / 2 - Width / 2;

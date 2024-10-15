@@ -66,13 +66,13 @@ namespace Game
                             {
                                 switch (Event.key.keysym.scancode)
                                 {
-                                case SDL_SCANCODE_SPACE:
-                                    {
-                                        TankComponent->TryShootProjectile();
-                                    }
-                                    break;
-                                default:
-                                    break;
+                                    case SDL_SCANCODE_SPACE:
+                                        {
+                                            TankComponent->TryShootProjectile();
+                                        }
+                                        break;
+                                    default:
+                                        break;
                                 }
                         }
                     }

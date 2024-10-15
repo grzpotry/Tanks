@@ -10,7 +10,8 @@
 namespace EngineCore
 {
     using namespace std;
-    
+
+    //TODO: move to game module
     enum class CollisionLayer : uint8_t
     {
         None = 0,

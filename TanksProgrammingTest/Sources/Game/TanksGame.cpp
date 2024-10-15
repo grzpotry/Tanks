@@ -57,13 +57,32 @@ namespace Game
 
     void TanksGame::Start()
     {
-        checkMsg(m_ResourceManager != nullptr, "Can't initiate resources");
+        StartGameMenu();
+    }
 
+    void TanksGame::StartGameMenu()
+    {
+        m_IsGameRestartPending = false;
+        
+        if (MainMenuTriggered)
+        {
+            MainMenuTriggered->Invoke();
+        }
+    }
+
+    void TanksGame::StartNewGame()
+    {
+        checkMsg(m_ResourceManager != nullptr, "Can't initiate resources");
+        printf("Start game \n");
+        
         shared_ptr<Entity> Player;
-   
+        
         m_ResourceManager->CreateEntity("Player", Player);
         m_Players.push_back(Player);
 
+        m_RestartGameTimer = 0.0f;
+        m_CurrentStage = 0;
+        m_AnyStageLoaded = false;
         m_IsGameRunning = true;
 
         if (GameStarted)
@@ -119,9 +138,19 @@ namespace Game
 
     void TanksGame::Update(float DeltaTime)
     {
-        if (m_IsGameFinishRequested && m_ActiveScene)
+        if (m_IsGameRestartPending)
         {
-            DestroyActiveScene();
+            m_RestartGameTimer += DeltaTime;
+
+            if (m_RestartGameTimer > RestartGameDuration)
+            {
+                StartGameMenu();
+            }
+        }
+        
+        if (m_IsGameFinishRequested)
+        {
+            FinishGame();
             return;
         }
         
@@ -161,6 +190,16 @@ namespace Game
             m_ActiveScene->UnInitialize();
         }
         m_ActiveScene = nullptr;
+    }
+
+    void TanksGame::FinishGame()
+    {
+        DestroyActiveScene();
+        m_Players.clear();
+
+        m_IsGameRunning = false;
+        m_IsGameRestartPending = true;
+        m_IsGameFinishRequested = false;
     }
 
     void TanksGame::RequestGameOver(Entity* SourceEntity)
